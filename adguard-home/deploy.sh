@@ -1,4 +1,10 @@
-#!/bin/bash
+#!/bin/zsh
+
+# Check if script is run with sudo privileges
+if [ "$EUID" -ne 0 ]; then
+    echo "Please run this script with sudo."
+    exit 1
+fi
 
 # Default configuration file path
 CONFIG_PATH="/mnt/data/adguard/conf"
