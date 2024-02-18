@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: home-assist
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: home-assist-pv
+  namespace: home-assist
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/mnt/data/home-assist"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: home-assist-pvc
+  namespace: home-assist
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: ""
+  volumeName: home-assist-pv
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: home-assist-service
+  namespace: home-assist
+spec:
+  selector:
+    app: home-assist
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8123
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 8123
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-assist-deployment
+  namespace: home-assist
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: home-assist
+  template:
+    metadata:
+      labels:
+        app: home-assist
+    spec:
+      containers:
+      - name: home-assist
+        image: homeassistant/home-assistant:latest
+        ports:
+          - containerPort: 8123
+        volumeMounts:
+        - name: home-assist-data
+          mountPath: /config
+      volumes:
+      - name: home-assist-data
+        persistentVolumeClaim:
+          claimName: home-assist-pvc
