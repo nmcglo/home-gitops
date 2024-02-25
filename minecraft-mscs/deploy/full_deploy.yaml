@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: minecraft
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: minecraft-pv
+  namespace: minecraft
+spec:
+  capacity:
+    storage: 30Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/mnt/data/minecraft-mscs"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minecraft-pvc
+  namespace: minecraft
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 30Gi
+  storageClassName: ""
+  volumeName: minecraft-pv
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minecraft-service
+  namespace: minecraft
+spec:
+  selector:
+    app: minecraft
+  ports:
+    - name: mscs
+      protocol: TCP
+      port: 25565
+      targetPort: 25565
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minecraft-deployment
+  namespace: minecraft
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minecraft
+  template:
+    metadata:
+      labels:
+        app: minecraft
+    spec:
+      containers:
+      - name: minecraft-mscs
+        image: nmcglo/minecraft-mscs:v0.1
+        ports:
+          - containerPort: 25565
+        volumeMounts:
+        - name: minecraft-data
+          mountPath: /opt/mscs
+      volumes:
+      - name: minecraft-data
+        persistentVolumeClaim:
+          claimName: minecraft-pvc
