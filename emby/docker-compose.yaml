@@ -1,6 +1,7 @@
 version: "2.3"
 services:
   emby:
+    network_mode: host
     image: emby/embyserver
     container_name: embyserver
     environment:
@@ -8,8 +9,8 @@ services:
       - GID=100 # The GID to run emby as (default 2)
       - GIDLIST=100 # A comma-separated list of additional GIDs to run emby as (default: 2)
     volumes:
-      - /Users/user/devel/home-infra/emby/config:/config # Configuration directory
-      - /Users/user/Movies/emby-movies:/mnt/share2 # Media directory
+      - /mnt/data/emby/config:/config # Configuration directory
+      - /media/user/media/plexmedia:/mnt/share2 # Media directory
     ports:
       - 8096:8096 # HTTP port
       - 8920:8920 # HTTPS port
