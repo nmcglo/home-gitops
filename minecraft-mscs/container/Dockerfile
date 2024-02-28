@@ -21,5 +21,5 @@ RUN mscs create default && echo "eula=true" > /opt/mscs/worlds/default/eula.txt
 EXPOSE 25565
 
 # start the server and keep container running
-CMD ["/bin/bash", "-c", "msctl -p mscs -l /opt/mscs -c /opt/mscs/mscs.defaults start; tail -f /dev/null"]
+CMD ["/bin/bash", "-c", "msctl -p mscs -l /opt/mscs -c /opt/mscs/mscs.defaults start; sleep infinity"]
 

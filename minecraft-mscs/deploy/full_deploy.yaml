@@ -64,6 +64,7 @@ spec:
       containers:
       - name: minecraft-mscs
         image: nmcglo/minecraft-mscs:v0.1
+        imagePullPolicy: Always
         ports:
           - containerPort: 25565
         volumeMounts:
