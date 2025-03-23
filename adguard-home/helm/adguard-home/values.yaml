@@ -10,8 +10,8 @@ persistence:
   size: 500Mi
   storageClass: ""
   nfs:
-    server: "primeradient.example.net"  # NFS server hostname or IP
-    path: "/volume1/AdguardHome"    # NFS share path
+    server: "nas-alpha.example.net"  # NFS server hostname or IP
+    path: "/volume1/adguardhome"    # NFS share path
     readOnly: false
 
 service:
