@@ -1,0 +1,6 @@
+apiVersion: v2
+name: adguard-home
+description: A Helm chart for AdGuard Home DNS server
+type: application
+version: 0.1.0
+appVersion: "latest"

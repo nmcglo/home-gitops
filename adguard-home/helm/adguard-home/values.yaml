@@ -1,0 +1,44 @@
+nameOverride: ""
+fullnameOverride: ""
+
+namespace:
+  create: true
+  name: adguard
+
+persistence:
+  enabled: true
+  size: 500Mi
+  storageClass: ""
+  nfs:
+    server: "primeradient.example.net"  # NFS server hostname or IP
+    path: "/volume1/AdguardHome"    # NFS share path
+    readOnly: false
+
+service:
+  type: LoadBalancer
+  ports:
+    httpInitial:
+      port: 3000
+      targetPort: 3000
+      protocol: TCP
+    http:
+      port: 80
+      targetPort: 80
+      protocol: TCP
+    dns:
+      port: 53
+      targetPort: 53
+      protocol: UDP
+
+image:
+  repository: adguard/adguardhome
+  tag: latest
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

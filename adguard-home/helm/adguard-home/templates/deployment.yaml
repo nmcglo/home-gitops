@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-deployment
+  namespace: {{ .Values.namespace.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: adguard-home
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        {{- range $key, $port := .Values.service.ports }}
+        - containerPort: {{ $port.targetPort }}
+          name: {{ $key }}
+          protocol: {{ $port.protocol }}
+        {{- end }}
+        volumeMounts:
+        - name: adguard-data
+          mountPath: /opt/adguardhome/work
+          subPath: work
+        - name: adguard-data
+          mountPath: /opt/adguardhome/conf
+          subPath: conf
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+      - name: adguard-data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-pvc
