@@ -17,7 +17,7 @@ persistence:
 service:
   type: LoadBalancer
   ports:
-    httpInitial:
+    httpinitial:
       port: 3000
       targetPort: 3000
       protocol: TCP
