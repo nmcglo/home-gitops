@@ -1,0 +1,109 @@
+# Global settings
+global:
+  namespace: monitoring
+
+# Prometheus configuration
+prometheus:
+  enabled: true
+  image:
+    repository: prom/prometheus
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: LoadBalancer
+    port: 9090
+  persistence:
+    enabled: true
+    size: 50Gi
+    accessMode: ReadWriteMany
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+  scrape_interval: 5s
+  evaluation_interval: 5s
+  scrapeConfigs:
+    - job_name: 'prometheus'
+      static_configs:
+        - targets: ['localhost:9090']
+    - job_name: 'qbittorrent-exporter'
+      static_configs:
+        - targets: ['qbittorrent-exporter.prometheus-exporters.svc.cluster.local:8080']
+    - job_name: 'emby-exporter'
+      static_configs:
+        - targets: ['emby-exporter.prometheus-exporters.svc.cluster.local:8080']
+    # - job_name: 'kubernetes-apiservers'
+    #   kubernetes_sd_configs:
+    #     - role: endpoints
+    #   scheme: https
+    #   tls_config:
+    #     ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    #   bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    #   relabel_configs:
+    #     - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+    #       action: keep
+    #       regex: default;kubernetes;https
+    # - job_name: 'kubernetes-nodes'
+    #   scheme: https
+    #   tls_config:
+    #     ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    #   bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    #   kubernetes_sd_configs:
+    #     - role: node
+    #   relabel_configs:
+    #     - action: labelmap
+    #       regex: __meta_kubernetes_node_label_(.+)
+    #     - target_label: __address__
+    #       replacement: kubernetes.default.svc:443
+    #     - source_labels: [__meta_kubernetes_node_name]
+    #       regex: (.+)
+    #       target_label: __metrics_path__
+    #       replacement: /api/v1/nodes/${1}/proxy/metrics
+
+# Grafana configuration
+grafana:
+  enabled: true
+  image:
+    repository: grafana/grafana
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: LoadBalancer
+    port: 3000
+  persistence:
+    enabled: true
+    size: 50Gi
+    accessMode: ReadWriteMany
+  resources:
+    requests:
+      cpu: 250m
+      memory: 750Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  securityContext:
+    fsGroup: 472
+    supplementalGroups:
+      - 0
+  admin:
+    # Use existing secret instead of creating one
+    existingSecret: ""
+    # Secret keys for admin credentials
+    userKey: admin-user
+    passwordKey: admin-password
+    # Admin credentials (only used if existingSecret is not set)
+    user: admin
+    password: admin
+  datasources:
+    - name: Prometheus
+      type: prometheus
+      # Either specify a full URL
+      # url: http://prometheus:9090
+      # Or specify a service name and port (will be resolved to http://<release-name>-prometheus:9090)
+      serviceName: prometheus
+      servicePort: 9090
+      access: proxy
+      isDefault: true

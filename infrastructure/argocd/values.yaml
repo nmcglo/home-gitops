@@ -1,0 +1,23 @@
+# ArgoCD Helm Values
+# For custom ArgoCD installation via Helm
+
+server:
+  service:
+    type: LoadBalancer  # Change to NodePort or use Ingress as needed
+
+configs:
+  params:
+    server.insecure: true  # Disable TLS if using external TLS termination
+
+# Enable metrics
+metrics:
+  enabled: true
+
+# Resource limits
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi

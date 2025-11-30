@@ -1,0 +1,15 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "monitoring.fullname" . }}-prometheus-config
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: {{ .Values.prometheus.scrape_interval }}
+      evaluation_interval: {{ .Values.prometheus.evaluation_interval }}
+    scrape_configs:
+    {{- toYaml .Values.prometheus.scrapeConfigs | nindent 6 }}
+{{- end }} 

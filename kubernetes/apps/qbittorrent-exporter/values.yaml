@@ -1,0 +1,37 @@
+replicaCount: 1
+
+image:
+  repository: caseyscarborough/qbittorrent-exporter
+  tag: latest
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+
+podSecurityContext: {}
+securityContext: {}
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+qbittorrent:
+  host: "qbittorrent"
+  port: 8080
+  username: ""
+  password: ""
+  protocol: "http"
+service:
+  type: ClusterIP
+  port: 8080

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: minecraft
+description: Minecraft Server with MSCS management
+type: application
+version: 0.1.0
+appVersion: "v0.1"

@@ -1,0 +1,53 @@
+{{- if .Values.persistence.data.enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "nginx-proxy-manager.fullname" . }}-data-pv
+spec:
+  capacity:
+    storage: {{ .Values.persistence.data.size }}
+  accessModes:
+    - {{ .Values.persistence.data.accessMode }}
+  nfs:
+    server: {{ .Values.persistence.data.nfs.server }}
+    path: {{ .Values.persistence.data.nfs.path }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "nginx-proxy-manager.fullname" . }}-data
+spec:
+  accessModes:
+    - {{ .Values.persistence.data.accessMode }}
+  storageClassName: ""
+  resources:
+    requests:
+      storage: {{ .Values.persistence.data.size }}
+{{- end }}
+---
+{{- if .Values.persistence.letsencrypt.enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "nginx-proxy-manager.fullname" . }}-letsencrypt-pv
+spec:
+  capacity:
+    storage: {{ .Values.persistence.letsencrypt.size }}
+  accessModes:
+    - {{ .Values.persistence.letsencrypt.accessMode }}
+  nfs:
+    server: {{ .Values.persistence.letsencrypt.nfs.server }}
+    path: {{ .Values.persistence.letsencrypt.nfs.path }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "nginx-proxy-manager.fullname" . }}-letsencrypt
+spec:
+  accessModes:
+    - {{ .Values.persistence.letsencrypt.accessMode }}
+  storageClassName: ""
+  resources:
+    requests:
+      storage: {{ .Values.persistence.letsencrypt.size }}
+{{- end }} 

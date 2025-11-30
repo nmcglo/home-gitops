@@ -1,0 +1,15 @@
+{{- if .Values.middleware.enabled }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ .Release.Name }}-middleware
+  namespace: {{ .Values.namespace }}
+spec:
+  errors:
+    status:
+      {{- toYaml .Values.middleware.statusCodes | nindent 6 }}
+    query: /{status}.html
+    service:
+      name: {{ .Release.Name }}
+      port: {{ .Values.service.port }}
+{{- end }}

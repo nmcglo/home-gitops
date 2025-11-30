@@ -1,0 +1,19 @@
+# Core namespaces for home infrastructure
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: adguard
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: home-assist
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: minecraft
+---
+apiVersion: v1
+kind: Namespace

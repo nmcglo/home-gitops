@@ -1,0 +1,117 @@
+# Longhorn Helm Values
+# Customized for home infrastructure
+
+# Default settings for Longhorn storage
+persistence:
+  # Default path on nodes where Longhorn stores data
+  defaultDataPath: /var/lib/longhorn
+
+  # Default replica count for volumes (how many copies)
+  defaultReplicaCount: 2  # For home lab, 2 replicas is usually sufficient
+
+  # Default data locality (best-effort means prefer local node)
+  defaultDataLocality: best-effort
+
+# Resource limits for Longhorn components
+longhornManager:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+longhornDriver:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+longhornUI:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# Default storage class settings
+defaultSettings:
+  # Backup target (optional - for S3, NFS, etc.)
+  # backupTarget: "nfs://nfs-server:/backup-path"
+  # backupTargetCredentialSecret: ""
+
+  # Guaranteed instance manager CPU
+  guaranteedInstanceManagerCpu: 5
+
+  # Create default disk on each node automatically
+  createDefaultDiskLabeledNodes: true
+
+  # Default data path on nodes
+  defaultDataPath: /var/lib/longhorn
+
+  # Replica soft anti-affinity (spread replicas across nodes)
+  replicaSoftAntiAffinity: true
+
+  # Auto salvage when all replicas fail
+  autoSalvage: true
+
+  # Auto delete pod when volume is detached
+  autoDeletePodWhenVolumeDetachedUnexpectedly: true
+
+  # Storage over-provisioning percentage
+  storageOverProvisioningPercentage: 200
+
+  # Storage minimal available percentage
+  storageMinimalAvailablePercentage: 25
+
+  # Upgrade checker (check for new Longhorn versions)
+  upgradeChecker: true
+
+  # Default longhorn static storage class parameters
+  defaultLonghornStaticStorageClass: longhorn-static
+
+# Ingress for Longhorn UI (disabled by default, use port-forward or LoadBalancer)
+ingress:
+  enabled: false
+  # To enable ingress with Traefik:
+  # enabled: true
+  # ingressClassName: traefik
+  # host: longhorn.local
+  # tls: false
+  # annotations: {}
+
+# Service type for Longhorn UI
+service:
+  ui:
+    type: ClusterIP  # Change to LoadBalancer if you want external access
+    # nodePort: null  # Specify if using NodePort
+
+  # Alternatively, use LoadBalancer:
+  # type: LoadBalancer
+
+# Enable CSI snapshots
+csi:
+  kubeletRootDir: /var/lib/kubelet
+  attacherReplicaCount: 1
+  provisionerReplicaCount: 1
+  resizerReplicaCount: 1
+  snapshotterReplicaCount: 1
+
+# Image pull policy
+image:
+  pullPolicy: IfNotPresent
+
+# Priority class for Longhorn pods (optional)
+# priorityClass: system-cluster-critical
+
+# Node selector for Longhorn components (optional)
+# nodeSelector: {}
+
+# Tolerations for Longhorn components (optional)
+# tolerations: []

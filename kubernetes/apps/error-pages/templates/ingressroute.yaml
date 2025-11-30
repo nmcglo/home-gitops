@@ -1,0 +1,22 @@
+{{- if .Values.traefik.enabled }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Release.Name }}-ingressroute
+  namespace: {{ .Values.namespace }}
+spec:
+  entryPoints:
+    {{- toYaml .Values.traefik.entryPoints | nindent 4 }}
+  routes:
+    - kind: Rule
+      match: HostRegexp(`{host:.+}`)
+      priority: {{ .Values.traefik.priority }}
+      services:
+        - kind: Service
+          name: {{ .Release.Name }}
+          port: {{ .Values.service.port }}
+      {{- if .Values.middleware.enabled }}
+      middlewares:
+        - name: {{ .Release.Name }}-middleware
+      {{- end }}
+{{- end }}

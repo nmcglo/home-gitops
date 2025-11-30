@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nginx-proxy-manager.fullname" . }}
+  labels:
+    {{- include "nginx-proxy-manager.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "nginx-proxy-manager.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "nginx-proxy-manager.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 81
+          name: admin
+        - containerPort: 443
+          name: https
+        volumeMounts:
+        {{- if .Values.persistence.data.enabled }}
+        - name: data
+          mountPath: /data
+        {{- end }}
+        {{- if .Values.persistence.letsencrypt.enabled }}
+        - name: letsencrypt
+          mountPath: /etc/letsencrypt
+        {{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+      {{- if .Values.persistence.data.enabled }}
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ include "nginx-proxy-manager.fullname" . }}-data
+      {{- end }}
+      {{- if .Values.persistence.letsencrypt.enabled }}
+      - name: letsencrypt
+        persistentVolumeClaim:
+          claimName: {{ include "nginx-proxy-manager.fullname" . }}-letsencrypt
+      {{- end }} 

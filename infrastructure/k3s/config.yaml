@@ -1,0 +1,15 @@
+# K3s Configuration
+# Place this file at /etc/rancher/k3s/config.yaml before installation
+
+# Cluster Configuration
+cluster-init: true
+disable:
+  - traefik  # Using custom ingress or MetalLB
+
+# Network Configuration
+# flannel-backend: vxlan
+# cluster-cidr: 10.42.0.0/16
+# service-cidr: 10.43.0.0/16
+
+# Write kubeconfig with permissions for non-root
+write-kubeconfig-mode: "0644"

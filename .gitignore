@@ -1,0 +1,55 @@
+# Environment files with sensitive data
+.env
+*.env
+!.env.example
+
+# Secrets
+secrets.yaml
+**/secrets/
+
+# Backups
+backups/
+old-structure-backup-*/
+*.backup
+
+# Kubernetes kubeconfig
+kubeconfig
+*.kubeconfig
+k3s.yaml
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Logs
+*.log
+logs/
+
+# Build artifacts
+build/
+dist/
+target/
+
+# Docker volumes (if accidentally created locally)
+volumes/
+data/
+
+# Private configuration
+*-private.yaml
+*.private
+
+# ArgoCD initial admin secret (should be rotated anyway)
+argocd-initial-admin-secret.txt

@@ -1,0 +1,42 @@
+# Default values for nginx-test
+
+namespace: nginx-test
+
+image:
+  repository: nginx
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+replicas: 1
+
+# HTML content for the static page
+htmlContent: |
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Welcome</title>
+      <style>
+          body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+          h1 { color: #007bff; }
+      </style>
+  </head>
+  <body>
+      <h1>Welcome to My Static Page!</h1>
+      <p>Served by Nginx in k3s with Traefik 🚀</p>
+  </body>
+  </html>
+
+# Traefik Ingress configuration
+ingress:
+  enabled: true
+  className: traefik
+  host: nginx-test.local
+  # Additional hosts can be added here
+  # hosts:
+  #   - nginx-test.example.com

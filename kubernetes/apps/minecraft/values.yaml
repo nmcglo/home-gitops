@@ -1,0 +1,27 @@
+# Default values for minecraft
+
+namespace: minecraft
+
+image:
+  repository: nmcglo/minecraft-mscs
+  tag: v0.1
+  pullPolicy: Always
+
+service:
+  type: LoadBalancer
+  port: 25565
+
+resources: {}
+  # limits:
+  #   cpu: 2000m
+  #   memory: 4Gi
+  # requests:
+  #   cpu: 1000m
+  #   memory: 2Gi
+
+persistence:
+  enabled: true
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 30Gi
+  hostPath: /mnt/data/minecraft-mscs

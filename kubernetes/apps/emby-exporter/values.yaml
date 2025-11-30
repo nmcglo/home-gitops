@@ -1,0 +1,39 @@
+replicaCount: 1
+
+image:
+  repository: bagul/goemby_exporter
+  tag: latest
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: "acc"
+
+podSecurityContext: {}
+securityContext: {}
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+emby:
+  protocol: "https"
+  url: "emby.example.net"
+  port: 443
+  userId: "1f13fe6acb6748a79adc563876d2a690"
+  apikey: ""
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 9210

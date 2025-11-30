@@ -1,0 +1,46 @@
+image:
+  repository: jc21/nginx-proxy-manager
+  tag: latest
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: LoadBalancer
+  ports:
+    http:
+      port: 80
+      targetPort: 80
+    admin:
+      port: 81
+      targetPort: 81
+    https:
+      port: 443
+      targetPort: 443
+
+persistence:
+  data:
+    enabled: true
+    size: 10Gi
+    accessMode: ReadWriteMany
+    storageClassName: ""
+    nfs:
+      server: nas-alpha.example.net
+      path: "/volume1/tpi-k3s/nginx-proxy-manager/data"
+  letsencrypt:
+    enabled: true
+    size: 5Gi
+    accessMode: ReadWriteMany
+    storageClassName: ""
+    nfs:
+      server: nas-alpha.example.net
+      path: "/volume1/tpi-k3s/nginx-proxy-manager/letsencrypt"
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 128Mi 

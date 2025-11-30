@@ -1,0 +1,25 @@
+{{- if .Values.grafana.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "monitoring.fullname" . }}-grafana-datasources
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+    {{- range .Values.grafana.datasources }}
+    - name: {{ .name }}
+      type: {{ .type }}
+      {{- if .url }}
+      url: {{ .url }}
+      {{- else if and .serviceName .servicePort }}
+      url: http://{{ include "monitoring.fullname" $ }}-{{ .serviceName }}:{{ .servicePort }}
+      {{- end }}
+      access: {{ .access }}
+      {{- if .isDefault }}
+      isDefault: {{ .isDefault }}
+      {{- end }}
+    {{- end }}
+{{- end }} 

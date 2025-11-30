@@ -1,0 +1,66 @@
+# Default values for error-pages
+
+namespace: default
+
+image:
+  repository: tarampampam/error-pages
+  tag: 2.20.0
+  pullPolicy: IfNotPresent
+
+# Error page template
+# Available templates: ghost, l7-light, l7-dark, noise, hacker-terminal,
+# cats, lost-in-space, app-down, connection, matrix, shuffle
+template: app-down
+
+# Show error details
+showDetails: true
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+
+# Deployment configuration
+replicas: 1
+
+# Rolling update strategy
+strategy:
+  rollingUpdate:
+    maxSurge: 0
+    maxUnavailable: 1
+  type: RollingUpdate
+
+# Resource limits and requests
+resources:
+  requests:
+    cpu: 50m
+    memory: 16Mi
+  limits:
+    memory: 32M
+
+# Security context
+securityContext:
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  runAsUser: 65534  # nobody
+  runAsGroup: 65534  # nogroup
+  capabilities:
+    drop:
+    - NET_RAW
+
+# Traefik IngressRoute configuration
+traefik:
+  enabled: true
+  entryPoints:
+    - websecure
+    - web
+  # Priority for the catch-all route (lower = lower priority)
+  priority: 1
+
+# Traefik Middleware configuration
+middleware:
+  enabled: true
+  # HTTP status codes to handle
+  statusCodes:
+    - "400-599"
