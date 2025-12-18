@@ -1,0 +1,34 @@
+namespace:
+  create: true
+  name: docker-registry
+
+image:
+  repository: registry
+  tag: "2"
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 5000
+  targetPort: 5000
+  protocol: TCP
+
+persistence:
+  enabled: true
+  size: 100Gi
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+
+replicas: 1
+
+env:
+  REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
