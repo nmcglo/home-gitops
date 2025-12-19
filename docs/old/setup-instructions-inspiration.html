@@ -1,0 +1,247 @@
+<h2 id="software-install">Software Install</h2>
+
+<p>Next, we need to install some software.</p>
+
+<p>I created a git repo and cloned it into Node1.  I plan on keeping charts/deployments/etc in there.</p>
+
+<h3 id="k3s-1">k3s</h3>
+
+<p>For the following commands, <code class="highlighter-rouge">&lt;NODE1&gt;</code> refers to the IP address of <code class="highlighter-rouge">turing-node1</code> and <code class="highlighter-rouge">&lt;TOKEN&gt;</code> refers to an auto-generated token (I used Bitwarden to make it).</p>
+
+<p>On Node 1:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-sfL</span> https://get.k3s.io | sh <span class="nt">-s</span> - <span class="nt">--write-kubeconfig-mode</span> 644 <span class="nt">--disable</span> servicelb <span class="nt">--token</span> &lt;TOKEN&gt; <span class="nt">--node-ip</span> &lt;NODE1&gt; <span class="nt">--disable-cloud-controller</span> <span class="nt">--disable</span> local-storage
+</code></pre></div></div>
+
+<p>Then on Nodes 2-4:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-sfL</span> https://get.k3s.io | <span class="nv">K3S_URL</span><span class="o">=</span>https://&lt;NODE1&gt;:6443 <span class="nv">K3S_TOKEN</span><span class="o">=</span>&lt;TOKEN&gt; sh -
+</code></pre></div></div>
+
+<p>Update labels on Node 1:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl label nodes turing-node1 kubernetes.io/role<span class="o">=</span>worker
+kubectl label nodes turing-node2 kubernetes.io/role<span class="o">=</span>worker  
+kubectl label nodes turing-node3 kubernetes.io/role<span class="o">=</span>worker  
+kubectl label nodes turing-node4 kubernetes.io/role<span class="o">=</span>worker
+
+kubectl label nodes turing-node1 node-type<span class="o">=</span>worker  
+kubectl label nodes turing-node2 node-type<span class="o">=</span>worker  
+kubectl label nodes turing-node3 node-type<span class="o">=</span>worker  
+kubectl label nodes turing-node4 node-type<span class="o">=</span>worker
+</code></pre></div></div>
+
+<h3 id="helm">Helm</h3>
+
+<p>Create a kubernetes config:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">KUBECONFIG</span><span class="o">=</span>~/.kube/config
+<span class="nb">mkdir</span> ~/.kube 2&gt; /dev/null
+<span class="nb">sudo </span>k3s kubectl config view <span class="nt">--raw</span> <span class="o">&gt;</span> <span class="s2">"</span><span class="nv">$KUBECONFIG</span><span class="s2">"</span>
+<span class="nb">chmod </span>600 <span class="s2">"</span><span class="nv">$KUBECONFIG</span><span class="s2">"</span>
+</code></pre></div></div>
+
+<p>Append the output of <code class="highlighter-rouge">echo "KUBECONFIG=$KUBECONFIG"</code> to <code class="highlighter-rouge">/etc/environment</code></p>
+
+<p>Now we can install Helm.
+I actually stored this inside the git repo mentioned earlier.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mkdir </span>helm  
+<span class="nb">cd </span>helm  
+curl <span class="nt">-fsSL</span> <span class="nt">-o</span> get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+<span class="nb">chmod </span>700 get_helm.sh
+./get_helm.sh
+helm version
+</code></pre></div></div>
+
+<h3 id="metallb">MetalLB</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>helm repo add metallb https://metallb.github.io/metallb
+helm search repo metallb
+helm upgrade <span class="nt">--install</span> metallb metallb/metallb <span class="nt">--create-namespace</span> <span class="nt">--namespace</span> metallb-system <span class="nt">--wait</span>
+</code></pre></div></div>
+
+<p>Unifi gave us a range of IPs for our VLAN. I assigned the very first one as static for the BMC.  As such, we will offset the start range for MetalLB by one.</p>
+
+<p>For below, we will use <code class="highlighter-rouge">&lt;START&gt;</code> to reference one more than Unifi said the range started at, and <code class="highlighter-rouge">&lt;END&gt;</code> for the end of the range Unifi identified.</p>
+
+<p>Create <code class="highlighter-rouge">metallb/deployment.yaml</code> inside our repo</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">metallb.io/v1beta1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">IPAddressPool</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">default-pool</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">metallb-system</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">addresses</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">&lt;START&gt;-&lt;END&gt;</span>
+<span class="nn">---</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">metallb.io/v1beta1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">L2Advertisement</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">default</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">metallb-system</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">ipAddressPools</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">default-pool</span>
+</code></pre></div></div>
+<p>Now, we apply it.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl apply <span class="nt">-f</span> deployment.yaml
+</code></pre></div></div>
+
+<p>Now, we’ll verify that traefik is taking the first IP in our range (<code class="highlighter-rouge">&lt;START&gt;</code>):</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl describe svc traefik <span class="nt">--namespace</span> kube-system
+</code></pre></div></div>
+<p>And we can verify that http://<code class="highlighter-rouge">&lt;START&gt;</code> shows the generic 404 not found</p>
+
+<h3 id="longhorn">Longhorn</h3>
+
+<p>First we need to setup the NVME drives. For each node:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt <span class="nt">-y</span> <span class="nb">install </span>nfs-common open-iscsi util-linux
+<span class="nb">sudo mkdir</span> /storage
+<span class="nb">sudo </span>mkfs.ext4 /dev/nvme0n1
+<span class="nb">sudo </span>su - root
+<span class="nb">echo</span> <span class="s2">"/dev/nvme0n1 /storage ext4 defaults 0 0"</span> | <span class="nb">tee</span> <span class="nt">-a</span> /etc/fstab
+<span class="nb">exit
+sudo </span>systemctl daemon-reload
+<span class="nb">sudo </span>mount <span class="nt">-a</span>
+</code></pre></div></div>
+
+<p>For this section, we will use <code class="highlighter-rouge">&lt;START+1&gt;</code> to define the IP address 1 higher than the start of the MetalLB/Traffic <code class="highlighter-rouge">&lt;START&gt;</code></p>
+
+<p>Now, on Node 1 we will install Longhorn to <code class="highlighter-rouge">&lt;START+1&gt;</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>helm repo add longhorn https://charts.longhorn.io
+helm <span class="nb">install </span>longhorn longhorn/longhorn <span class="nt">--namespace</span> longhorn-system <span class="nt">--create-namespace</span> <span class="nt">--set</span> defaultSettings.defaultDataPath<span class="o">=</span><span class="s2">"/storage"</span> <span class="nt">--set</span> service.ui.loadBalancerIP<span class="o">=</span><span class="s2">"&lt;START+1&gt;"</span> <span class="nt">--set</span> service.ui.type<span class="o">=</span><span class="s2">"LoadBalancer"</span>
+</code></pre></div></div>
+
+<p>Wait for everything to be running:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl <span class="nt">-n</span> longhorn-system get pod
+</code></pre></div></div>
+
+<p>Verify StorageClass is present</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get storageclass
+</code></pre></div></div>
+
+<ul>
+  <li>Open http://<code class="highlighter-rouge">&lt;START+1&gt;</code> and Longhorn UI should be accessible.</li>
+</ul>
+
+<p>This should show that it is indeed on <code class="highlighter-rouge">&lt;START+1&gt;</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl describe svc <span class="nt">--namespace</span> longhorn-system longhorn-frontend
+</code></pre></div></div>
+
+<p><a href="https://photos.app.goo.gl/3hzL4H6YwMcub7nS8"><img src="/assets/img/turingpi2/longhorn.png" alt="Longhorn" /> </a></p>
+
+<h4 id="test-longhorn">Test Longhorn</h4>
+
+<p>Create <code class="highlighter-rouge">longhorn/pvc_test.yaml</code> in our repo</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>  
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>  
+<span class="na">kind</span><span class="pi">:</span> <span class="s">PersistentVolumeClaim</span>  
+<span class="na">metadata</span><span class="pi">:</span>  
+  <span class="na">name</span><span class="pi">:</span> <span class="s">test-pvc</span>  
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">default</span>  
+<span class="na">spec</span><span class="pi">:</span>  
+  <span class="na">accessModes</span><span class="pi">:</span>  
+    <span class="pi">-</span> <span class="s">ReadWriteOnce</span>  
+  <span class="na">storageClassName</span><span class="pi">:</span> <span class="s">longhorn</span>  
+  <span class="na">resources</span><span class="pi">:</span>  
+    <span class="na">requests</span><span class="pi">:</span>  
+      <span class="na">storage</span><span class="pi">:</span> <span class="s">10Mi</span>
+</code></pre></div></div>
+
+<p>Apply it:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl apply <span class="nt">-f</span> pvc_test.yaml
+</code></pre></div></div>
+
+<p>Verify that it worked:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get pvc
+</code></pre></div></div>
+
+<p>Note that it also shows up in the Longhorn UI.</p>
+
+<p>Cleanup our test:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl delete <span class="nt">-f</span> pvc_test.yaml
+</code></pre></div></div>
+
+<h3 id="argocd">ArgoCD</h3>
+
+<p>On node 1:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl create namespace argocd
+kubectl apply <span class="nt">-n</span> argocd <span class="nt">-f</span> https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+</code></pre></div></div>
+
+<p>Next, we will wait for it to complete</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get pods <span class="nt">-n</span> argocd
+</code></pre></div></div>
+
+<p>For this next section, we will use <code class="highlighter-rouge">&lt;START+2&gt;</code> to refer to the IP address 2 above the MetalLB <code class="highlighter-rouge">&lt;START&gt;</code></p>
+
+<p>We are going to give <code class="highlighter-rouge">&lt;START+2&gt;</code> to Argo.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl patch service argocd-server <span class="nt">-n</span> argocd <span class="nt">--patch</span> <span class="s1">'{ "spec": { "type": "LoadBalancer", "loadBalancerIP": "&lt;START+2&gt;" } }'</span>
+</code></pre></div></div>
+
+<h3 id="login">Login</h3>
+
+<p>Create <code class="highlighter-rouge">argocd/get_credentials.sh</code> in our repo.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+
+<span class="nb">echo</span> <span class="s2">"http://&lt;START+2&gt;"</span>
+<span class="nb">echo</span> <span class="s2">"Username=admin"</span>
+<span class="nv">PASS</span><span class="o">=</span><span class="sb">`</span>kubectl <span class="nt">-n</span> argocd get secret argocd-initial-admin-secret <span class="nt">-o</span> <span class="nv">jsonpath</span><span class="o">=</span><span class="s2">"{.data.password}"</span> | <span class="nb">base64</span> <span class="nt">-d</span><span class="p">;</span> <span class="nb">echo</span><span class="sb">`</span>
+<span class="nb">echo</span> <span class="s2">"Password=</span><span class="nv">$PASS</span><span class="s2">"</span>
+</code></pre></div></div>
+<p>Run the following to commit it and run the script:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">chmod </span>744 get_credentials.sh
+./get_credentials
+</code></pre></div></div>
+<ul>
+  <li>Open http://<code class="highlighter-rouge">&lt;START+2&gt;</code> and enter the supplied credentials</li>
+</ul>
+
+<h4 id="testing-argo">Testing Argo</h4>
+
+<ul>
+  <li>Add the files from <a href="https://gitlab.com/vstrycek/turingpi-error-pages">this repo</a> into <code class="highlighter-rouge">traefik/error-pages</code> in your GitOps repo from before</li>
+  <li>Go into <code class="highlighter-rouge">Settings | Repositories</code> and add our your repo from before
+    <ul>
+      <li>Use the SSH key you created on Node 1</li>
+    </ul>
+  </li>
+  <li>Go into <code class="highlighter-rouge">Applications | Create Application</code> (or <code class="highlighter-rouge">New App</code> if it isn’t your first one)
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Application Name: error-pages
+Project Name: default
+Sync Policy: Manual
+Auto-Create Namespace: "check"
+Repository URL(GIT): &lt;your gitops repo url&gt;
+Revision: HEAD
+Path: traefik/error-pages
+Cluster URL: https://kubernetes.default.svc
+Namespace: error-pages
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>Find the traefik IP address:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl describe svc traefik <span class="nt">--namespace</span> kube-system
+</code></pre></div></div>
+<ul>
+  <li>We can see it is at <code class="highlighter-rouge">&lt;START&gt;</code></li>
+  <li>Open http://<code class="highlighter-rouge">&lt;START&gt;</code> and we can now shows a better 404 error page</li>
+</ul>
+
+<p>Enable CLI from the GUI</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl patch role argocd-server <span class="nt">-n</span> argocd <span class="nt">--type</span><span class="o">=</span>json <span class="nt">-p</span><span class="o">=</span><span class="s1">'[{"op": "add", "path": "/rules/-", "value": {"apiGroups": [""], "resources": ["pods/exec"], "verbs": ["create"]}}]'</span>
+kubectl patch configmap argocd-cm <span class="nt">-n</span> argocd <span class="nt">-p</span> <span class="s1">'{"data": {"exec.enabled": "true"}}'</span>
+</code></pre></div></div>
+<p>Next we will delete and restart the running pods</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl delete pods <span class="nt">-n</span> argocd <span class="nt">--field-selector</span><span class="o">=</span>status.phase<span class="o">=</span>Running
+</code></pre></div></div>
+<p>Then wait for them to get into the Running state</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get pod <span class="nt">-n</span> argocd
+</code></pre></div></div>
+
