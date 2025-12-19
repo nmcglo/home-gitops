@@ -11,7 +11,7 @@ spec:
     path: kubernetes/apps/nginx-proxy-manager
   destination:
     server: https://kubernetes.default.svc
-    namespace: nginx-proxy-manager
+    namespace: nginx-pm
   syncPolicy:
     automated:
       prune: true
