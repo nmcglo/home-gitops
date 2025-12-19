@@ -36,7 +36,7 @@ htmlContent: |
 ingress:
   enabled: true
   className: traefik
-  host: nginx-test.local
+  host: doodle.cluster.example.net
   # Additional hosts can be added here
   # hosts:
   #   - nginx-test.example.com
