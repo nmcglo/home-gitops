@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ray-operator
+  namespace: argocd
+spec:
+  project: ray
+  source:
+    repoURL: https://github.com/ray-project/kuberay
+    path: helm-chart/kuberay-operator
+    targetRevision: v1.3.2
+    helm:
+      values: |
+        env:
+          - name: RAY_USAGE_STATS_ENABLED
+            value: "0"
+      skipCrds: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ray-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
