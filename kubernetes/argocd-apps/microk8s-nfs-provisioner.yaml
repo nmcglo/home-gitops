@@ -19,7 +19,7 @@ spec:
           name: nfs
           defaultClass: false
           accessModes: ReadWriteMany
-          reclaimPolicy: Retain
+          reclaimPolicy: Delete
           archiveOnDelete: true
   destination:
     server: https://192.168.1.170:16443
