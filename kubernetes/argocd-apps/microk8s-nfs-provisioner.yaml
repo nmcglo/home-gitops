@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: microk8s-nfs-provisioner
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+    chart: nfs-subdir-external-provisioner
+    targetRevision: 4.0.18
+    helm:
+      values: |
+        nfs:
+          server: nas-alpha.example.net
+          path: /volume1/tpi-k3s
+
+        storageClass:
+          name: nfs
+          defaultClass: false
+          accessModes: ReadWriteMany
+          reclaimPolicy: Retain
+          archiveOnDelete: true
+  destination:
+    server: https://192.168.1.170:16443
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
