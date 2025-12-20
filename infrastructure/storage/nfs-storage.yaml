@@ -1,21 +1,21 @@
-# NFS Storage Configuration
-# This is an example - adjust based on your NFS server setup
+# # NFS Storage Configuration
+# # This is an example - adjust based on your NFS server setup
 
-# NFS CSI Driver (optional - for dynamic provisioning)
-# Install with: kubectl apply -f https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/deploy/install-driver.sh
+# # NFS CSI Driver (optional - for dynamic provisioning)
+# # Install with: kubectl apply -f https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/deploy/install-driver.sh
 
-# Storage Class for NFS
----
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: nfs-client
-provisioner: nfs.csi.k8s.io
-parameters:
-  server: nas-alpha.example.net  # Your NFS server
-  share: /volume1  # NFS export path
-mountOptions:
-  - hard
-  - nfsvers=4.1
-reclaimPolicy: Retain
-volumeBindingMode: Immediate
+# # Storage Class for NFS
+# ---
+# apiVersion: storage.k8s.io/v1
+# kind: StorageClass
+# metadata:
+#   name: nfs-client
+# provisioner: nfs.csi.k8s.io
+# parameters:
+#   server: nas-alpha.example.net  # Your NFS server
+#   share: /volume1  # NFS export path
+# mountOptions:
+#   - hard
+#   - nfsvers=4.1
+# reclaimPolicy: Retain
+# volumeBindingMode: Immediate
