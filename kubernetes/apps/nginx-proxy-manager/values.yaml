@@ -1,6 +1,6 @@
 image:
   repository: jc21/nginx-proxy-manager
-  tag: latest
+  tag: 2.13.5
   pullPolicy: IfNotPresent
 
 nameOverride: ""
@@ -18,6 +18,7 @@ service:
     https:
       port: 443
       targetPort: 443
+  loadBalancerIP: 192.168.100.13
 
 persistence:
   data:

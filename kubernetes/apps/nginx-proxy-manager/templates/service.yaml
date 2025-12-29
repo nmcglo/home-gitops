@@ -16,5 +16,6 @@ spec:
   - port: {{ .Values.service.ports.https.port }}
     targetPort: {{ .Values.service.ports.https.targetPort }}
     name: https
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
   selector:
     {{- include "nginx-proxy-manager.selectorLabels" . | nindent 4 }} 
