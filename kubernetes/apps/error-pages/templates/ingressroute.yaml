@@ -9,7 +9,7 @@ spec:
     {{- toYaml .Values.traefik.entryPoints | nindent 4 }}
   routes:
     - kind: Rule
-      match: HostRegexp(`{.+}`)
+      match: HostRegexp(`.+`)
       priority: {{ .Values.traefik.priority }}
       services:
         - kind: Service
