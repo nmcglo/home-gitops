@@ -89,7 +89,8 @@ ingress:
 # Service type for Longhorn UI
 service:
   ui:
-    type: ClusterIP  # Change to LoadBalancer if you want external access
+    type: LoadBalancer  # Change to LoadBalancer if you want external access
+    loadBalancerIP: 192.168.100.12
     # nodePort: null  # Specify if using NodePort
 
   # Alternatively, use LoadBalancer:

@@ -3,8 +3,8 @@
 
 # Cluster Configuration
 cluster-init: true
-disable:
-  - traefik  # Using custom ingress or MetalLB
+# disable:
+#   - traefik  # Using custom ingress or MetalLB
 
 # Network Configuration
 # flannel-backend: vxlan
