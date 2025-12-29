@@ -12,3 +12,4 @@ spec:
       protocol: {{ .Values.service.protocol }}
       port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
