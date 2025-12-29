@@ -2,5 +2,5 @@ apiVersion: v2
 name: error-pages
 description: Custom error pages for Traefik ingress controller
 type: application
-version: 0.1.0
+version: 0.1.1
 appVersion: "2.20.0"
