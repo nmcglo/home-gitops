@@ -11,4 +11,5 @@ spec:
     query: /{status}.html
     service:
       name: {{ .Release.Name }}
+      port: {{ .Values.service.port }}
 {{- end }}
