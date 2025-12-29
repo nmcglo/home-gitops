@@ -12,6 +12,7 @@ prometheus:
   service:
     type: LoadBalancer
     port: 9090
+    loadBalancerIP: 192.168.100.15
   persistence:
     enabled: true
     size: 50Gi
@@ -73,6 +74,7 @@ grafana:
   service:
     type: LoadBalancer
     port: 3000
+    loadBalancerIP: 192.168.100.15
   persistence:
     enabled: true
     size: 50Gi
