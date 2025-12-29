@@ -18,7 +18,7 @@ service:
     https:
       port: 443
       targetPort: 443
-  loadBalancerIP: 192.168.100.13
+  loadBalancerIP: 192.168.100.14
 
 persistence:
   data:
