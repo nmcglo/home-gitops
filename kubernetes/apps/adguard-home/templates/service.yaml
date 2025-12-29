@@ -14,3 +14,4 @@ spec:
     name: {{ $key }}
   {{- end }}
   type: {{ .Values.service.type }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
