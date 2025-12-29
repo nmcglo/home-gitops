@@ -9,5 +9,6 @@ spec:
     status:
       {{- toYaml .Values.middleware.statusCodes | nindent 6 }}
     query: /{status}.html
-    service: {{ .Release.Name }}
+    service:
+      name: {{ .Release.Name }}
 {{- end }}
