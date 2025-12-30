@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/mealie-recipes/mealie
-  tag: v1.12.0
+  tag: v3.9.1
   pullPolicy: IfNotPresent
 
 service:
