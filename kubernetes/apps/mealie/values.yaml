@@ -1,0 +1,43 @@
+image:
+  repository: ghcr.io/mealie-recipes/mealie
+  tag: v1.12.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 9000
+  targetPort: 9000
+  loadBalancerIP: "192.168.100.19"  # Set this to a specific IP if using MetalLB with static assignment
+
+persistence:
+  enabled: true
+  storageClass: "longhorn"
+  accessMode: ReadWriteMany
+  size: 10Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+env:
+  # Base configuration
+  ALLOW_SIGNUP: "true"
+  PUID: "1000"
+  PGID: "1000"
+  TZ: "America/New_York"
+  MAX_WORKERS: "1"
+  WEB_CONCURRENCY: "1"
+  BASE_URL: "https://mealie.example.net"
+
+  # Database - using SQLite by default (stored in persistent volume)
+  # For PostgreSQL, add:
+  # DB_ENGINE: "postgres"
+  # POSTGRES_USER: "mealie"
+  # POSTGRES_PASSWORD: "mealie"
+  # POSTGRES_SERVER: "postgres-service"
+  # POSTGRES_PORT: "5432"
+  # POSTGRES_DB: "mealie"
