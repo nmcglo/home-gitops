@@ -1,6 +1,6 @@
 # Default values for cloudflare-tunnels
 
-namespace: cloudflare-tunnels
+namespace: cloudflared-tunnel
 
 image:
   repository: cloudflare/cloudflared
