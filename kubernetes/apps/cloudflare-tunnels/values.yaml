@@ -1,0 +1,76 @@
+# Default values for cloudflare-tunnels
+
+namespace: cloudflare-tunnels
+
+image:
+  repository: cloudflare/cloudflared
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Number of replicas for high availability
+# Note: replicas are for HA, not load balancing
+# Downscaling will break existing connections
+replicas: 1
+
+# Tunnel token from Cloudflare Zero Trust dashboard
+# This should be overridden in a separate values file or via ArgoCD
+tunnelToken: ""
+
+# Cloudflared configuration
+cloudflared:
+  # Log level: debug, info, warn, error, fatal
+  logLevel: info
+
+  # Metrics server configuration
+  metricsPort: 2000
+
+  # Additional command-line arguments
+  extraArgs: []
+
+  # Resource limits and requests
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+# Liveness probe configuration
+livenessProbe:
+  httpGet:
+    path: /ready
+    port: 2000
+  failureThreshold: 1
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+# Readiness probe configuration
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 2000
+  failureThreshold: 1
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+# Security context for ICMP traffic (ping, traceroute)
+securityContext:
+  sysctls:
+    - name: net.ipv4.ping_group_range
+      value: "65532 65532"
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod labels
+podLabels: {}
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity rules
+affinity: {}
