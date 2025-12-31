@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflared-tunnel
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:nmcglo/home-infra.git
+    targetRevision: HEAD
+    path: kubernetes/apps/cloudflared-tunnel
+    helm:
+      parameters:
+        - name: tunnelToken
+          value: "op://home-gitops/Cloudflare Tunnel Key - Example.net/credential"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudflared-tunnel
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
