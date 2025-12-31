@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflare-k8s-gateway
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/pl4nty/cloudflare-kubernetes-gateway
+    targetRevision: v0.8.1
+    path: config/default
+    kustomize:
+      namespace: cloudflare-gateway
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudflare-gateway
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - Validate=false
