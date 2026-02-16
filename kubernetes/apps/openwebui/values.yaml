@@ -1,0 +1,26 @@
+# Default values for openwebui
+
+namespace: openwebui
+
+image:
+  repository: ghcr.io/open-webui/open-webui
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 8080
+  targetPort: 8080
+
+replicas: 1
+
+env:
+  WEBUI_AUTH: "true"
+  # OPENAI_API_BASE_URLS: "https://api.openai.com/v1"
+  # OPENAI_API_KEYS: ""
+
+persistence:
+  enabled: true
+  storageClassName: longhorn
+  accessMode: ReadWriteMany
+  size: 10Gi
