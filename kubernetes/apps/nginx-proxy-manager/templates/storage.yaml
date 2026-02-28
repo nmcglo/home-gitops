@@ -1,53 +1,35 @@
-{{- if .Values.persistence.data.enabled }}
+{{- range $name, $vol := .Values.persistence }}
+{{- if $vol.enabled }}
+{{- if $vol.nfs }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ include "nginx-proxy-manager.fullname" . }}-data-pv
+  name: {{ include "nginx-proxy-manager.fullname" $ }}-{{ $name }}-pv
 spec:
   capacity:
-    storage: {{ .Values.persistence.data.size }}
+    storage: {{ $vol.size }}
   accessModes:
-    - {{ .Values.persistence.data.accessMode }}
-  nfs:
-    server: {{ .Values.persistence.data.nfs.server }}
-    path: {{ .Values.persistence.data.nfs.path }}
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: {{ include "nginx-proxy-manager.fullname" . }}-data
-spec:
-  accessModes:
-    - {{ .Values.persistence.data.accessMode }}
+    - {{ $vol.accessMode }}
   storageClassName: ""
-  resources:
-    requests:
-      storage: {{ .Values.persistence.data.size }}
+  nfs:
+    server: {{ $vol.nfs.server }}
+    path: {{ $vol.nfs.path }}
+---
 {{- end }}
----
-{{- if .Values.persistence.letsencrypt.enabled }}
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: {{ include "nginx-proxy-manager.fullname" . }}-letsencrypt-pv
-spec:
-  capacity:
-    storage: {{ .Values.persistence.letsencrypt.size }}
-  accessModes:
-    - {{ .Values.persistence.letsencrypt.accessMode }}
-  nfs:
-    server: {{ .Values.persistence.letsencrypt.nfs.server }}
-    path: {{ .Values.persistence.letsencrypt.nfs.path }}
----
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "nginx-proxy-manager.fullname" . }}-letsencrypt
+  name: {{ include "nginx-proxy-manager.fullname" $ }}-{{ $name }}
 spec:
   accessModes:
-    - {{ .Values.persistence.letsencrypt.accessMode }}
-  storageClassName: ""
+    - {{ $vol.accessMode }}
+  storageClassName: {{ $vol.storageClassName | default "" | quote }}
+  {{- if $vol.nfs }}
+  volumeName: {{ include "nginx-proxy-manager.fullname" $ }}-{{ $name }}-pv
+  {{- end }}
   resources:
     requests:
-      storage: {{ .Values.persistence.letsencrypt.size }}
-{{- end }} 
+      storage: {{ $vol.size }}
+---
+{{- end }}
+{{- end }}

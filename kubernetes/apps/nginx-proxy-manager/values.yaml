@@ -20,23 +20,45 @@ service:
       targetPort: 443
   loadBalancerIP: 192.168.100.14
 
+# Persistence volumes. Two modes:
+#
+# NFS (manual PV):
+#   storageClassName: ""
+#   nfs:
+#     server: my-nas.example.com
+#     path: /volume1/some/path
+#
+# Dynamic storage class (e.g. longhorn):
+#   storageClassName: longhorn
+#   # omit the nfs block entirely
 persistence:
   data:
     enabled: true
     size: 10Gi
-    accessMode: ReadWriteMany
-    storageClassName: ""
-    nfs:
-      server: nas-alpha.example.net
-      path: "/volume1/tpi-k3s/nginx-proxy-manager/data"
+    accessMode: ReadWriteOnce
+    storageClassName: longhorn
   letsencrypt:
     enabled: true
     size: 5Gi
-    accessMode: ReadWriteMany
-    storageClassName: ""
-    nfs:
-      server: nas-alpha.example.net
-      path: "/volume1/tpi-k3s/nginx-proxy-manager/letsencrypt"
+    accessMode: ReadWriteOnce
+    storageClassName: longhorn
+# persistence:
+#   data:
+#     enabled: true
+#     size: 10Gi
+#     accessMode: ReadWriteMany
+#     storageClassName: ""
+#     nfs:
+#       server: nas-alpha.example.net
+#       path: "/volume1/tpi-k3s/nginx-proxy-manager/data"
+#   letsencrypt:
+#     enabled: true
+#     size: 5Gi
+#     accessMode: ReadWriteMany
+#     storageClassName: ""
+#     nfs:
+#       server: nas-alpha.example.net
+#       path: "/volume1/tpi-k3s/nginx-proxy-manager/letsencrypt"
 
 resources:
   limits:
@@ -44,4 +66,4 @@ resources:
     memory: 1Gi
   requests:
     cpu: 100m
-    memory: 128Mi 
+    memory: 128Mi
