@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: nginx-proxy-manager
+  name: nginx-proxy-manager-new
   namespace: argocd
 spec:
   project: default
