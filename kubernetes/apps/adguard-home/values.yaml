@@ -13,7 +13,7 @@ persistence:
 service:
   type: LoadBalancer
   # loadBalancerIP: 192.168.100.13
-  loadBalancerIP:
+  loadBalancerIP: 192.168.100.21
   ports:
     httpinitial:
       port: 3000
