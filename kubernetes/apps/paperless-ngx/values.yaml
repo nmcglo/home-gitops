@@ -18,7 +18,7 @@ paperless:
     tag: latest
     pullPolicy: IfNotPresent
   env:
-    PAPERLESS_URL: "paperless.example.net"
+    PAPERLESS_URL: "https://paperless.example.net"
     PAPERLESS_TIME_ZONE: "America/New_York"
     PAPERLESS_OCR_LANGUAGE: "eng"
     PAPERLESS_ADMIN_USER: "admin"
