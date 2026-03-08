@@ -36,7 +36,7 @@ paperless:
           key: PAPERLESS_SECRET_KEY
   mountPaths:
     consume: /mnt/consume
-    media_data: /mnt/media_data
+    mediaData: /mnt/media_data
 
 postgres:
   image:
@@ -74,7 +74,7 @@ persistence:
     storageClassName: longhorn
     accessMode: ReadWriteMany
     size: 5Gi
-  media_data:
+  mediaData:
     storageClassName: longhorn
     accessMode: ReadWriteOnce
     size: 20Gi

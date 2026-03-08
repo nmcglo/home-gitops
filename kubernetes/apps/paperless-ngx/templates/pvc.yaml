@@ -2,15 +2,15 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Release.Name }}-media_data-pvc
+  name: {{ .Release.Name }}-mediaData-pvc
   namespace: {{ .Values.namespace }}
 spec:
-  storageClassName: {{ .Values.persistence.media_data.storageClassName }}
+  storageClassName: {{ .Values.persistence.mediaData.storageClassName }}
   accessModes:
-    - {{ .Values.persistence.media_data.accessMode }}
+    - {{ .Values.persistence.mediaData.accessMode }}
   resources:
     requests:
-      storage: {{ .Values.persistence.media_data.size }}
+      storage: {{ .Values.persistence.mediaData.size }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

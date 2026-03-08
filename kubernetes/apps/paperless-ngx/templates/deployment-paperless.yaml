@@ -23,9 +23,9 @@ spec:
             - name: PAPERLESS_CONSUMPTION_DIR
               value: {{ .Values.paperless.mountPaths.consume }}
             - name: PAPERLESS_MEDIA_ROOT
-              value: {{ .Values.paperless.mountPaths.media_data }}/media
+              value: {{ .Values.paperless.mountPaths.mediaData }}/media
             - name: PAPERLESS_DATA_DIR
-              value: {{ .Values.paperless.mountPaths.media_data }}/data
+              value: {{ .Values.paperless.mountPaths.mediaData }}/data
             - name: PAPERLESS_REDIS
               value: "redis://{{ .Release.Name }}-redis:6379"
             - name: PAPERLESS_DBHOST
@@ -60,14 +60,14 @@ spec:
               {{- end }}
             {{- end }}
           volumeMounts:
-            - name: media_data
-              mountPath: {{ .Values.paperless.mountPaths.media_data }}
+            - name: mediaData
+              mountPath: {{ .Values.paperless.mountPaths.mediaData }}
             - name: consume
               mountPath: {{ .Values.paperless.mountPaths.consume }}
       volumes:
-        - name: media_data
+        - name: mediaData
           persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-media_data-pvc
+            claimName: {{ .Release.Name }}-mediaData-pvc
         - name: consume
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-consume-pvc
