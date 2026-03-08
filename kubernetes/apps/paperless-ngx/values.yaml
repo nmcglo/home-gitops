@@ -36,7 +36,7 @@ paperless:
           key: PAPERLESS_SECRET_KEY
   mountPaths:
     consume: /mnt/consume
-    paperless: /mnt/media_data
+    media_data: /mnt/media_data
 
 postgres:
   image:
