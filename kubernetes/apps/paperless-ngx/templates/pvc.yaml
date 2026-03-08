@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Release.Name }}-mediaData-pvc
+  name: {{ .Release.Name }}-media-data-pvc
   namespace: {{ .Values.namespace }}
 spec:
   storageClassName: {{ .Values.persistence.mediaData.storageClassName }}

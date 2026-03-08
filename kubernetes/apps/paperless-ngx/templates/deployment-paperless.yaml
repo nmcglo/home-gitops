@@ -60,14 +60,14 @@ spec:
               {{- end }}
             {{- end }}
           volumeMounts:
-            - name: mediaData
+            - name: media-data
               mountPath: {{ .Values.paperless.mountPaths.mediaData }}
             - name: consume
               mountPath: {{ .Values.paperless.mountPaths.consume }}
       volumes:
-        - name: mediaData
+        - name: media-data
           persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-mediaData-pvc
+            claimName: {{ .Release.Name }}-media-data-pvc
         - name: consume
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-consume-pvc
