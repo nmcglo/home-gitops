@@ -1,0 +1,88 @@
+# Default values for paperless-ngx
+
+namespace: paperless-ngx
+
+onepasswordSecrets:
+  - name: paperless-ngx-secret
+    enabled: true
+    autoRestart: true
+    itemPath: "vaults/home-gitops/items/paperless_ngx_secret_key"
+  - name: paperless-admin-password
+    enabled: true
+    autoRestart: true
+    itemPath: "vaults/home-gitops/items/paperless_ngx_admin_password"
+
+paperless:
+  image:
+    repository: ghcr.io/paperless-ngx/paperless-ngx
+    tag: latest
+    pullPolicy: IfNotPresent
+  env:
+    PAPERLESS_URL: "paperless.example.net"
+    PAPERLESS_TIME_ZONE: "America/New_York"
+    PAPERLESS_OCR_LANGUAGE: "eng"
+    PAPERLESS_ADMIN_USER: "admin"
+    PAPERLESS_CONSUMER_RECURSIVE: "true"
+    PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
+    PAPERLESS_ADMIN_PASSWORD:
+      valueFrom:
+        secretKeyRef:
+          name: paperless-admin-password
+          key: PAPERLESS_ADMIN_PASSWORD
+    PAPERLESS_SECRET_KEY:
+      valueFrom:
+        secretKeyRef:
+          name: paperless-ngx-secret
+          key: PAPERLESS_SECRET_KEY
+  mountPaths:
+    consume: /mnt/consume
+    paperless: /mnt/media_data
+
+postgres:
+  image:
+    repository: docker.io/library/postgres
+    tag: "18.3"
+    pullPolicy: IfNotPresent
+  database: paperless
+  user: paperless
+  password: changeme
+redis:
+  image:
+    repository: docker.io/library/redis
+    tag: "8.6"
+    pullPolicy: IfNotPresent
+
+gotenberg:
+  image:
+    repository: docker.io/gotenberg/gotenberg
+    tag: "8.27"
+    pullPolicy: IfNotPresent
+
+tika:
+  image:
+    repository: docker.io/apache/tika
+    tag: "3.2.3.0"
+    pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 8000
+  targetPort: 8000
+
+persistence:
+  consume:
+    storageClassName: longhorn
+    accessMode: ReadWriteMany
+    size: 5Gi
+  media_data:
+    storageClassName: longhorn
+    accessMode: ReadWriteOnce
+    size: 20Gi
+  pgdata:
+    storageClassName: longhorn
+    accessMode: ReadWriteOnce
+    size: 10Gi
+  redisdata:
+    storageClassName: longhorn
+    accessMode: ReadWriteOnce
+    size: 2Gi
