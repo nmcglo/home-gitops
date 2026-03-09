@@ -47,6 +47,8 @@ postgres:
   user: paperless
   password: changeme
 redis:
+  uid: 999
+  gid: 999
   image:
     repository: docker.io/library/redis
     tag: "8.6"

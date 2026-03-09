@@ -13,6 +13,13 @@ spec:
       labels:
         app: {{ .Release.Name }}-redis
     spec:
+      initContainers:
+      - name: fix-permissions
+        image: busybox
+        command: ["sh", "-c", "chown -R {{ .Values.redis.uid | default 999 }}:{{ .Values.redis.gid | default 999 }} /data"]
+        volumeMounts:
+        - name: redisdata
+          mountPath: /data
       containers:
         - name: redis
           image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
