@@ -1,0 +1,14 @@
+version: "2.3"
+services:
+  scanner-pi:
+    image: nmcglo/scanner-pi:v0.1.0
+    container_name: scanner-pi
+    user: "0:0"
+    environment:
+      - SCAN_PI_CONFIG_PATH=/config/config.toml
+      - SCAN_PI_PAPERLESS_NGX_TOKEN="op://home-gitops/Paperless API Token/credential"
+    devices:
+      - /dev/bus/usb
+    volumes:
+      - ./config.toml:/config/config.toml:ro
+    restart: unless-stopped
