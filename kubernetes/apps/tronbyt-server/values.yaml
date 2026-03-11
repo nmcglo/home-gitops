@@ -1,0 +1,32 @@
+image:
+  repository: ghcr.io/tronbyt/server
+  tag: "2"
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 8000
+  targetPort: 8000
+  loadBalancerIP: ""  # Set to a specific IP if using MetalLB with static assignment
+
+persistence:
+  enabled: true
+  storageClass: "longhorn"
+  accessMode: ReadWriteMany
+  size: 5Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+env:
+  PUID: "1000"
+  PGID: "1000"
+  PRODUCTION: ""
+  ENABLE_USER_REGISTRATION: ""
+  SINGLE_USER_AUTO_LOGIN: ""
+  GITHUB_TOKEN: ""

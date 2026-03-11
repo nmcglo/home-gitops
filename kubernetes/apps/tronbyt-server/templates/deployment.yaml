@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: tronbyt-server
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+          name: http
+        env:
+        {{- range $key, $value := .Values.env }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        volumeMounts:
+        - name: data
+          mountPath: /app/data
+        - name: localtime
+          mountPath: /etc/localtime
+          readOnly: true
+        livenessProbe:
+          exec:
+            command:
+            - /app/tronbyt-server
+            - health
+          initialDelaySeconds: 10
+          periodSeconds: 90
+          timeoutSeconds: 10
+          failureThreshold: 3
+        {{- if .Values.resources }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}
+      volumes:
+      {{- if .Values.persistence.enabled }}
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-pvc
+      {{- else }}
+      - name: data
+        emptyDir: {}
+      {{- end }}
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+          type: File
