@@ -1,0 +1,77 @@
+namespace: gatus
+
+image:
+  repository: ghcr.io/twin/gatus
+  tag: v5.35.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 8080
+  targetPort: 8080
+  loadBalancerIP: ""  # Set to a specific IP for MetalLB static assignment, e.g. "192.168.100.20"
+
+persistence:
+  enabled: true
+  storageClass: "longhorn"
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+resources: {}
+  # requests:
+  #   cpu: 100m
+  #   memory: 64Mi
+  # limits:
+  #   cpu: 500m
+  #   memory: 256Mi
+
+# 1Password operator managed secrets.
+# Each entry creates a OnePasswordItem which the operator syncs into a Kubernetes Secret
+# of the same name. Fields from that secret can then be mapped to environment variables.
+#
+# onepasswordSecrets:
+#   - name: gatus-alerting          # Name of the OnePasswordItem (and resulting K8s Secret)
+#     enabled: true
+#     itemPath: "vaults/MyVault/items/GatusAlerting"
+#     autoRestart: "true"           # Restart pod when secret changes (default: true)
+#     env:
+#       - envVar: SLACK_WEBHOOK_URL  # Environment variable name inside the container
+#         secretKey: webhook-url     # Field name within the 1Password item
+#       - envVar: PAGERDUTY_KEY
+#         secretKey: integration-key
+#
+#   - name: gatus-db-creds
+#     enabled: false
+#     itemPath: "vaults/MyVault/items/GatusDB"
+#     env:
+#       - envVar: DB_PASSWORD
+#         secretKey: password
+onepasswordSecrets:
+  - name: homeassistant-examplenet
+    enabled: true
+    itemPath: "vaults/home-gitops/items/Home Assistant - examplenet - Long Lived Access Token"
+    env:
+      - envVar: HOME_ASSISTANT_TOKEN
+        secretKey: credential
+
+# Gatus configuration - see https://github.com/TwiN/gatus for full reference
+config: |
+  storage:
+    type: sqlite
+    path: /data/data.db
+
+  web:
+    port: 8080
+
+  ui:
+    title: "Status"
+    header: "Status"
+
+  endpoints:
+    - name: Home Assistant
+      url: https://ha.example.net/api/
+      method: GET
+      interval: 5m
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
