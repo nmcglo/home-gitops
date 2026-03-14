@@ -72,6 +72,10 @@ config: |
       url: https://ha.example.net/api/
       method: GET
       interval: 5m
+      client:
+        timeout: 10s
+      headers:
+        Authorization: "Bearer $HOME_ASSISTANT_TOKEN"
       conditions:
         - "[STATUS] == 200"
         - "[RESPONSE_TIME] < 1000"
