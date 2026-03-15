@@ -55,7 +55,7 @@ onepasswordSecrets:
     env:
       - envVar: HOME_ASSISTANT_TOKEN
         secretKey: credential
-  
+
   - name: adguard-basic-auth
     enabled: true
     itemPath: "vaults/home-gitops/items/Adguard Home - Basic Creds"
@@ -77,6 +77,16 @@ config: |
     header: "Status"
 
   endpoints:
+    - name: Synology DSM
+      group: Core
+      url: https://nas-alpha.example.net/webapi/entry.cgi?api=SYNO.API.Info&version=1&method=query
+      method: GET
+      client:
+        timeout: 10s
+      conditions:
+        - "[STATUS] == 200"
+      interval: 5m
+
     - name: Home Assistant
       group: Core
       url: https://ha.example.net/api/
@@ -107,7 +117,7 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
-    
+
     - name: AdGuard Home
       group: Core
       url: https://adguard1.example.net/control/status
@@ -129,7 +139,7 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
-    
+
     - name: CNCF Distribution Registry
       group: Core
       url: https://registry.example.net/v2/
@@ -160,6 +170,16 @@ config: |
         - "[STATUS] == 200"
       interval: 5m
 
+    - name: Jenkins
+      group: Core
+      url: https://jenkins.example.net/api/json
+      method: GET
+      client:
+        timeout: 10s
+      conditions:
+        - "[STATUS] == 200"
+      interval: 5m
+
     - name: Emby
       group: Home
       url: https://emby.example.net/emby/system/info/public
@@ -179,10 +199,20 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
-    
+
     - name: Mealie
       group: Home
       url: https://mealie.example.net/api/app/about
+      method: GET
+      client:
+        timeout: 10s
+      conditions:
+        - "[STATUS] == 200"
+      interval: 5m
+
+    - name: TronByt Server
+      group: Home
+      url: https://tronbyt.example.net/metrics
       method: GET
       client:
         timeout: 10s
@@ -199,7 +229,7 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
-    
+
     - name: Open WebUI
       group: Local LLMs
       url: https://chat.example.net/
