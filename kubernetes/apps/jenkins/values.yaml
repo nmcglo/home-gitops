@@ -88,6 +88,12 @@ jcasc:
                     resourceRequestMemory: "256Mi"
                     resourceLimitCpu: "500m"
                     resourceLimitMemory: "512Mi"
+    appearance:
+      prism:
+        theme: PRISM
+      themeManager:
+        disableUserThemes: false
+        theme: "solarizedSystem"
 
 onepasswordSecrets: []
 
