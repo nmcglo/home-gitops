@@ -222,7 +222,7 @@ config: |
       interval: 5m
 
     - name: Longhorn
-      group: Cluster
+      group: Cluster Infra
       url: https://longhorn.example.net/v1/volumes
       method: GET
       client:
@@ -232,7 +232,7 @@ config: |
       interval: 5m
 
     - name: MetalLB
-      group: Cluster
+      group: Cluster Infra
       url: https://metallb.cluster.example.net/metrics
       method: GET
       client:
