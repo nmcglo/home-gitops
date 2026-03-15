@@ -80,3 +80,43 @@ config: |
       conditions:
         - "[STATUS] == 200"
         - "[RESPONSE_TIME] < 1000"
+    
+    - name: Garage Object Store
+      group: S3 COS
+      url: https://s3.example.net/
+      method: GET
+      conditions:
+        - "[STATUS] == 200"
+      interval: 30s
+
+    - name: Garage RPC
+      group: S3 COS
+      url: https://s3rpc.example.net/
+      method: GET
+      conditions:
+        - "[STATUS] == 200"
+      interval: 30s
+
+      - name: Garage Web
+      group: S3 COS
+      url: https://s3admin.example.net/
+      method: GET
+      conditions:
+        - "[STATUS] == 200"
+      interval: 30s
+
+    - name: Garage Admin
+      group: S3 COS
+      url: https://s3admin.example.net/
+      method: GET
+      conditions:
+        - "[STATUS] == 200"
+      interval: 30s
+
+    - name: Garage Web UI
+      group: S3 COS
+      url: https://garage.example.net/
+      method: GET
+      conditions:
+        - "[STATUS] == 200"
+      interval: 30s
