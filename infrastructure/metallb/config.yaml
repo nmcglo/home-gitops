@@ -30,3 +30,28 @@ spec:
   # Optional: Specify which network interfaces to use
   # interfaces:
   # - eth0
+
+# add svc to expose the metallb controller metrics (optional)
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: metallb-controller-metrics
+  namespace: metallb-system
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: metallb
+    app.kubernetes.io/name: metallb
+  annotations:
+    metallb.io/address-pool: default-pool  # optional: pin to a pool
+spec:
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: metallb
+    app.kubernetes.io/name: metallb
+  ports:
+    - name: metrics
+      port: 7472
+      targetPort: 7472
+      protocol: TCP
+  type: LoadBalancer
