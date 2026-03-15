@@ -97,7 +97,7 @@ config: |
         - "[STATUS] == 200"
       interval: 30s
 
-      - name: Garage Web
+    - name: Garage Web
       group: S3 COS
       url: https://s3admin.example.net/
       method: GET
