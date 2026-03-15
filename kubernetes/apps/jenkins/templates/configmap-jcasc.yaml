@@ -1,0 +1,12 @@
+{{- if .Values.jcasc.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-jcasc
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Release.Name }}
+data:
+  jcasc.yaml: |
+    {{- .Values.jcasc.config | nindent 4 }}
+{{- end }}

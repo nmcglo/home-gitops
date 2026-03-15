@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-plugins
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Release.Name }}
+data:
+  plugins.txt: |
+    {{- range .Values.plugins }}
+    {{ . }}
+    {{- end }}

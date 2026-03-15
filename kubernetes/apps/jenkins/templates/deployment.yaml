@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+      annotations:
+        checksum/plugins: {{ .Values.plugins | toJson | sha256sum }}
+        {{- if .Values.jcasc.enabled }}
+        checksum/jcasc: {{ .Values.jcasc.config | sha256sum }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      initContainers:
+      - name: install-plugins
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+          - /bin/jenkins-plugin-cli
+          - --plugin-file
+          - /plugins/plugins.txt
+          - --plugin-download-directory
+          - /var/jenkins_home/plugins
+        volumeMounts:
+        - name: plugins-config
+          mountPath: /plugins
+        - name: jenkins-home
+          mountPath: /var/jenkins_home
+      containers:
+      - name: jenkins
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+          name: http
+        - containerPort: {{ .Values.service.agentTargetPort }}
+          name: agent
+        env:
+        - name: JAVA_OPTS
+          value: {{ .Values.javaOpts | quote }}
+        {{- if .Values.jcasc.enabled }}
+        - name: CASC_JENKINS_CONFIG
+          value: /jcasc/jcasc.yaml
+        {{- end }}
+        {{- range .Values.onepasswordSecrets }}
+        {{- if .enabled }}
+        {{- $secretName := .name }}
+        {{- range .env }}
+        - name: {{ .envVar }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ $secretName }}
+              key: {{ .secretKey }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
+        volumeMounts:
+        - name: jenkins-home
+          mountPath: /var/jenkins_home
+        {{- if .Values.jcasc.enabled }}
+        - name: jcasc-config
+          mountPath: /jcasc
+          readOnly: true
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /login
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /login
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 3
+        {{- if .Values.resources }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}
+      volumes:
+      - name: plugins-config
+        configMap:
+          name: {{ .Release.Name }}-plugins
+      {{- if .Values.jcasc.enabled }}
+      - name: jcasc-config
+        configMap:
+          name: {{ .Release.Name }}-jcasc
+      {{- end }}
+      {{- if .Values.persistence.enabled }}
+      - name: jenkins-home
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-pvc
+      {{- else }}
+      - name: jenkins-home
+        emptyDir: {}
+      {{- end }}
