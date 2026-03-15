@@ -55,6 +55,13 @@ onepasswordSecrets:
     env:
       - envVar: HOME_ASSISTANT_TOKEN
         secretKey: credential
+  
+  - name: adguard-basic-auth
+    enabled: true
+    itemPath: "vaults/home-gitops/items/Adguard Home - Basic Creds"
+    env:
+      - envVar: ADGUARD_BASIC_AUTH_B64
+        secretKey: credential
 
 # Gatus configuration - see https://github.com/TwiN/gatus for full reference
 config: |
@@ -89,4 +96,26 @@ config: |
       method: GET
       conditions:
         - "[STATUS] == 200"
-      interval: 30s
+      interval: 5m
+
+    - name: NGINX Proxy Manager
+      group: Core
+      url:  https://proxy.example.net/api/
+      method: GET
+      client:
+        timeout: 10s
+      conditions:
+        - "[STATUS] == 200"
+      interval: 5m
+    
+    - name: AdGuard Home
+      group: Core
+      url: https://adguard1.example.net/control/status
+      method: GET
+      client:
+        timeout: 10s
+      headers:
+        Authorization: "Basic $ADGUARD_BASIC_AUTH_B64"
+      conditions:
+        - "[STATUS] == 200"
+      interval: 5m
