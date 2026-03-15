@@ -83,6 +83,7 @@ config: |
       method: GET
       client:
         timeout: 10s
+        insecure: true # Skips TLS certificate verification
       conditions:
         - "[STATUS] == 200"
       interval: 5m
