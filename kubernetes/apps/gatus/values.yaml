@@ -1,5 +1,7 @@
 namespace: gatus
 
+revisionHistoryLimit: 2
+
 image:
   repository: ghcr.io/twin/gatus
   tag: v5.35.0
