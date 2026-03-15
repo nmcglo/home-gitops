@@ -225,7 +225,7 @@ config: |
       client:
         timeout: 10s
       headers:
-        Authorization: "Bearer $PAPERLESS_API_TOKEN"
+        Authorization: "Token $PAPERLESS_API_TOKEN"
       conditions:
         - "[STATUS] == 200"
       interval: 5m
