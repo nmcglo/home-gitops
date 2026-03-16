@@ -84,32 +84,38 @@ config: |
     header: "Status"
 
   endpoints:
-    - name: Synology DSM
-      group: Core
-      url: https://nas-alpha.example.net/webapi/entry.cgi?api=SYNO.API.Info&version=1&method=query
+    - name: Longhorn
+      group: Example.net Cluster Critical Components
+      url: https://longhorn.example.net/v1/volumes
       method: GET
       client:
         timeout: 10s
-        insecure: true # Skips TLS certificate verification
       conditions:
         - "[STATUS] == 200"
       interval: 5m
 
-    - name: Home Assistant
-      group: Core
-      url: https://ha.example.net/api/
+    - name: MetalLB
+      group: Example.net Cluster Critical Components
+      url: https://metallb.cluster.example.net/metrics
       method: GET
-      interval: 5m
       client:
         timeout: 10s
-      headers:
-        Authorization: "Bearer $HOME_ASSISTANT_TOKEN"
       conditions:
         - "[STATUS] == 200"
-        - "[RESPONSE_TIME] < 1000"
+      interval: 5m
+
+    - name: Traefik
+      group: Example.net Cluster Critical Components
+      url: https://traefik.cluster.example.net/ping
+      method: GET
+      client:
+        timeout: 10s
+      conditions:
+        - "[STATUS] == 200"
+      interval: 5m
 
     - name: Garage S3 COS
-      group: Core
+      group: Example.Net Infrastructure
       url: https://garage.example.net/api/v2/GetClusterHealth
       method: GET
       conditions:
@@ -117,7 +123,7 @@ config: |
       interval: 5m
 
     - name: NGINX Proxy Manager
-      group: Core
+      group: Example.Net Infrastructure
       url:  https://proxy.example.net/api/
       method: GET
       client:
@@ -127,7 +133,7 @@ config: |
       interval: 5m
 
     - name: AdGuard Home
-      group: Core
+      group: Example.Net Infrastructure
       url: https://adguard1.example.net/control/status
       method: GET
       client:
@@ -139,7 +145,7 @@ config: |
       interval: 5m
 
     - name: ArgoCD
-      group: Core
+      group: Example.Net Infrastructure
       url: https://argocd.example.net/api/version
       method: GET
       client:
@@ -149,7 +155,7 @@ config: |
       interval: 5m
 
     - name: CNCF Distribution Registry
-      group: Core
+      group: Example.Net Infrastructure
       url: https://registry.example.net/v2/
       method: GET
       client:
@@ -159,7 +165,7 @@ config: |
       interval: 5m
 
     - name: Grafana
-      group: Core
+      group: Example.Net Infrastructure
       url: https://grafana.example.net/api/health
       method: GET
       client:
@@ -169,7 +175,7 @@ config: |
       interval: 5m
 
     - name: Prometheus
-      group: Core
+      group: Example.Net Infrastructure
       url: https://prometheus.example.net/api/v1/status/runtimeinfo
       method: GET
       client:
@@ -179,7 +185,7 @@ config: |
       interval: 5m
 
     - name: Jenkins
-      group: Core
+      group: Example.Net Infrastructure
       url: https://jenkins.example.net/api/json
       method: GET
       client:
@@ -187,6 +193,40 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+    
+    - name: Jenkins Agent Servicing
+      group: Example.Net Infrastructure
+      url: https://jenkins-service.example.net/
+      method: GET
+      client:
+        timeout: 10s
+      conditions:
+        - "[STATUS] == 200"
+      interval: 5m
+
+    - name: Synology NAS DSM
+      group: Home
+      url: https://nas-alpha.example.net/webapi/entry.cgi?api=SYNO.API.Info&version=1&method=query
+      method: GET
+      client:
+        timeout: 10s
+        insecure: true # Skips TLS certificate verification
+      conditions:
+        - "[STATUS] == 200"
+      interval: 5m
+
+    - name: Home Assistant
+      group: Home
+      url: https://ha.example.net/api/
+      method: GET
+      interval: 5m
+      client:
+        timeout: 10s
+      headers:
+        Authorization: "Bearer $HOME_ASSISTANT_TOKEN"
+      conditions:
+        - "[STATUS] == 200"
+        - "[RESPONSE_TIME] < 1000"
 
     - name: Emby
       group: Home
@@ -233,26 +273,6 @@ config: |
     - name: TronByt Server
       group: Home
       url: https://tronbyt.example.net/metrics
-      method: GET
-      client:
-        timeout: 10s
-      conditions:
-        - "[STATUS] == 200"
-      interval: 5m
-
-    - name: Longhorn
-      group: Cluster Infra
-      url: https://longhorn.example.net/v1/volumes
-      method: GET
-      client:
-        timeout: 10s
-      conditions:
-        - "[STATUS] == 200"
-      interval: 5m
-
-    - name: MetalLB
-      group: Cluster Infra
-      url: https://metallb.cluster.example.net/metrics
       method: GET
       client:
         timeout: 10s
