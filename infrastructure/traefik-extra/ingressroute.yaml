@@ -1,0 +1,32 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  namespace: kube-system
+  name: traefik-dashboard
+spec:
+  routes:
+  - match: Host(`traefik.cluster.example.net`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`)) 
+    kind: Rule
+    services:
+    - name: api@internal
+      kind: TraefikService
+  - match: Host(`traefik.cluster.example.net`) && PathPrefix(`/metrics`)
+    kind: Rule
+    services:
+    - name: prometheus@internal
+      kind: TraefikService
+  - match: Host(`traefik.cluster.example.net`) && PathPrefix(`/ping`)
+    kind: Rule
+    services:
+    - name: ping@internal
+      kind: TraefikService
+    # middlewares:
+    #   - name: auth
+# ---
+# apiVersion: traefik.io/v1alpha1
+# kind: Middleware
+# metadata:
+#   name: auth
+# spec:
+#   basicAuth:
+#     secret: secretName # Kubernetes secret named "secretName"
