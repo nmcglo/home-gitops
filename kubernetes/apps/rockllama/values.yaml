@@ -1,0 +1,32 @@
+# Default values for rockllama
+
+namespace: rockllama
+
+image:
+  repository: nmcglo/rockllama
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 8080
+  targetPort: 8080
+
+replicas: 1
+
+resources:
+  limits:
+    rockchip.com/npu: "1"
+    cpu: 4000m
+    memory: 16Gi
+  requests:
+    rockchip.com/npu: "1"
+    cpu: 4000m
+    memory: 12Gi
+
+persistence:
+  enabled: true
+  storageClassName: longhorn
+  accessMode: ReadWriteMany
+  size: 100Gi
+  mountPath: /models

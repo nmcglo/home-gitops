@@ -1,0 +1,6 @@
+apiVersion: v2
+name: rockllama
+description: RockLlama - LLM inference on RK3588 NPU
+type: application
+version: 0.1.0
+appVersion: "latest"
