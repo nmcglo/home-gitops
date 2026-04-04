@@ -21,7 +21,7 @@ resources:
     memory: 14Gi
   requests:
     rockchip.com/npu: "1"
-    cpu: "8"
+    cpu: "4"
     memory: 12Gi
 
 persistence:
