@@ -5,7 +5,7 @@ namespace: rk-llamacpp
 image:
   repository: nmcglo/rk-llama.cpp
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: LoadBalancer
