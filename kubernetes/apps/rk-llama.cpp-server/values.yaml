@@ -2,6 +2,15 @@
 
 namespace: rk-llamacpp
 
+commandOverride:
+  - "rkllama-server"
+  - "--models-dir"
+  - "/models"
+  - "--port"
+  - "8080"
+  - "--host"
+  - "0.0.0.0"
+
 image:
   repository: nmcglo/rk-llama.cpp
   tag: latest

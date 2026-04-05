@@ -31,6 +31,10 @@ spec:
         - name: rk-llamacpp
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.commandOverride }}
+          command:
+            {{- toJson .Values.commandOverride | nindent 12 }}
+          {{- end }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}
           securityContext:
