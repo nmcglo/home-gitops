@@ -27,11 +27,11 @@ resources:
   limits:
     rockchip.com/npu: "1"
     cpu: "8"
-    memory: 14Gi
+    memory: 20Gi
   requests:
     rockchip.com/npu: "1"
     cpu: "4"
-    memory: 12Gi
+    memory: 16Gi
 
 persistence:
   enabled: true
