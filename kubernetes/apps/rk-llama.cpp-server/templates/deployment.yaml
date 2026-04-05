@@ -21,7 +21,7 @@ spec:
         - name: fix-freq
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["/scripts/fix_freq_rk3588.sh"]
+          command: ["/rk-llamacpp/fix_freq_rk3588.sh"]
           securityContext:
             privileged: true
           volumeMounts:
