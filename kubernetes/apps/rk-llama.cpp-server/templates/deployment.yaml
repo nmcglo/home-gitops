@@ -28,7 +28,7 @@ spec:
             - name: sys
               mountPath: /sys
       containers:
-        - name: rockllama
+        - name: rk-llamacpp
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
