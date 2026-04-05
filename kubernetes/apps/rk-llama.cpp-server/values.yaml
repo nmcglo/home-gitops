@@ -1,0 +1,32 @@
+# Default values for rk-llamacpp
+
+namespace: rk-llamacpp
+
+image:
+  repository: nmcglo/rk-llama.cpp
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 8080
+  targetPort: 8080
+
+replicas: 1
+
+resources:
+  limits:
+    rockchip.com/npu: "1"
+    cpu: "8"
+    memory: 14Gi
+  requests:
+    rockchip.com/npu: "1"
+    cpu: "4"
+    memory: 12Gi
+
+persistence:
+  enabled: true
+  storageClassName: longhorn
+  accessMode: ReadWriteMany
+  size: 100Gi
+  mountPath: /models
