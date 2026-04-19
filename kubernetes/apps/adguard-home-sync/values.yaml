@@ -15,8 +15,10 @@ service:
   targetPort: 8080
 
 env:
-  ORIGIN_URL: "https://adguard.example.net" # home assistant
-  REPLICA1_URL: "https://adguard1.example.net" # example.net cluster
+  - name: ORIGIN_URL
+    value: "https://adguard.example.net" # home assistant
+  - name: REPLICA1_URL
+    value: "https://adguard1.example.net" # example.net
 
 # adguardhome-sync configuration - rendered into a config YAML file
 config:
