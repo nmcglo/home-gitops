@@ -16,7 +16,7 @@ service:
 
 env:
   - name: ORIGIN_URL
-    value: "https://adguard.example.net" # home assistant
+    value: "http://192.168.1.139:5353" # home assistant
   - name: REPLICA1_URL
     value: "https://adguard1.example.net" # example.net
 
