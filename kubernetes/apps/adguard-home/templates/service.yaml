@@ -14,4 +14,6 @@ spec:
     name: {{ $key }}
   {{- end }}
   type: {{ .Values.service.type }}
+  {{- if .Values.service.type | eq "LoadBalancer" }}
   loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+  {{- end }}
