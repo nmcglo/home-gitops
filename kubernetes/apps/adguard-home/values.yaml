@@ -30,7 +30,7 @@ service:
 
 image:
   repository: adguard/adguardhome
-  tag: latest
+  tag: v0.107.74
   pullPolicy: IfNotPresent
 
 resources:
