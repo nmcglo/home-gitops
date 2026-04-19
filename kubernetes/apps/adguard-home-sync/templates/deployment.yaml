@@ -18,6 +18,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
+            - run
             - --config
             - /config/adguardhome-sync.yaml
           ports:
