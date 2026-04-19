@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: adguard-home-service-temp
+  namespace: adguard
+spec:
+  loadBalancerIP: 192.168.100.13
+  ports:
+  - name: dns
+    port: 53
+    protocol: UDP
+    targetPort: 53
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  - name: httpinitial
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: adguard-home-new
+  type: LoadBalancer

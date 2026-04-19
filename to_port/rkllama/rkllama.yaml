@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rkllama
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rkllama-models-pvc
+  namespace: rkllama
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rkllama
+  namespace: rkllama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rkllama
+  template:
+    metadata:
+      labels:
+        app: rkllama
+    spec:
+      # Ensure pod can be scheduled on arm64 RK1 nodes
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - name: rkllama
+          image: nmcglo/rkllama:v1.2.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          # Expose the NPU resource
+          resources:
+            requests:
+              rockchip.com/npu: "1"
+              cpu: "6"
+              memory: "24Gi"
+            limits:
+              rockchip.com/npu: "1"
+              cpu: "8"
+              memory: "30Gi"
+          env:
+            - name: RKLLAMA_MODELS_PATH
+              value: /opt/rkllama/models
+          # Must grant access to device nodes for NPU
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: models
+              mountPath: /opt/rkllama/models
+            - name: dev
+              mountPath: /dev
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: rkllama-models-pvc
+        # Mount host /dev so the container can see the RK NPU nodes
+        - name: dev
+          hostPath:
+            path: /dev
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rkllama
+  namespace: rkllama
+spec:
+  selector:
+    app: rkllama
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: LoadBalancer

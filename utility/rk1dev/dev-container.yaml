@@ -1,0 +1,173 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rk1dev
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dev-user-password
+  namespace: rk1dev
+type: Opaque
+stringData:
+  password: "changeme"  # Replace with your desired password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rk1-dev-ssh
+  namespace: rk1dev
+spec:
+  type: NodePort
+  selector:
+    app: rk1-dev
+  ports:
+    - name: ssh
+      port: 22
+      targetPort: 22
+      nodePort: 30222
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rk1-dev
+  namespace: rk1dev
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: rk1-dev
+  template:
+    metadata:
+      labels:
+        app: rk1-dev
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      securityContext:
+        supplementalGroups:
+          - 44
+          - 992
+      initContainers:
+        - name: setup
+          image: nmcglo/rknpu-devel:llm1.2.2-rknn2.3.2
+          imagePullPolicy: Always
+          command:
+            - /bin/sh
+            - -c
+            - |
+              # Generate SSH host keys
+              ssh-keygen -t rsa -f /keys/ssh_host_rsa_key -N ""
+              ssh-keygen -t ecdsa -f /keys/ssh_host_ecdsa_key -N ""
+              ssh-keygen -t ed25519 -f /keys/ssh_host_ed25519_key -N ""
+
+              # Create hashed password for dev user
+              HASHED_PASSWORD=$(echo "${DEV_PASSWORD}" | openssl passwd -6 -stdin)
+              echo "${HASHED_PASSWORD}" > /setup/passwd_hash
+          env:
+            - name: DEV_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dev-user-password
+                  key: password
+          volumeMounts:
+            - name: ssh-host-keys
+              mountPath: /keys
+            - name: setup
+              mountPath: /setup
+          securityContext:
+            privileged: true
+      containers:
+        - name: dev
+          image: nmcglo/rknpu-devel:llm1.2.2-rknn2.3.2
+          imagePullPolicy: Always
+          command:
+            - /bin/sh
+            - -c
+            - |
+              # Set dev user password
+              if [ -f /setup/passwd ]; then
+                cat /setup/passwd | chpasswd
+              fi
+              # Start sshd
+              exec /usr/sbin/sshd -D
+          ports:
+            - containerPort: 22
+          securityContext:
+            privileged: true
+          env:
+            - name: DEBIAN_FRONTEND
+              value: noninteractive
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+            - name: storage
+              mountPath: /storage
+            - name: ssh-host-keys
+              mountPath: /etc/ssh/ssh_host_rsa_key
+              subPath: ssh_host_rsa_key
+            - name: ssh-host-keys
+              mountPath: /etc/ssh/ssh_host_rsa_key.pub
+              subPath: ssh_host_rsa_key.pub
+            - name: ssh-host-keys
+              mountPath: /etc/ssh/ssh_host_ecdsa_key
+              subPath: ssh_host_ecdsa_key
+            - name: ssh-host-keys
+              mountPath: /etc/ssh/ssh_host_ecdsa_key.pub
+              subPath: ssh_host_ecdsa_key.pub
+            - name: ssh-host-keys
+              mountPath: /etc/ssh/ssh_host_ed25519_key
+              subPath: ssh_host_ed25519_key
+            - name: ssh-host-keys
+              mountPath: /etc/ssh/ssh_host_ed25519_key.pub
+              subPath: ssh_host_ed25519_key.pub
+            - name: setup
+              mountPath: /setup
+          resources:
+            limits:
+              rockchip.com/npu: "1"
+              cpu: 4000m
+              memory: 24Gi
+            requests:
+              rockchip.com/npu: "1"
+              cpu: 3000m
+              memory: 20Gi
+      volumes:
+        - name: workspace
+          persistentVolumeClaim:
+            claimName: rk1-dev-workspace
+        - name: storage
+          persistentVolumeClaim:
+            claimName: rk1-dev-cluster-storage
+        - name: ssh-host-keys
+          emptyDir: {}
+        - name: setup
+          emptyDir: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rk1-dev-workspace
+  namespace: rk1dev
+spec:
+  storageClassName: "nfs"
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rk1-dev-cluster-storage
+  namespace: rk1dev
+spec:
+  storageClassName: "longhorn"
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
