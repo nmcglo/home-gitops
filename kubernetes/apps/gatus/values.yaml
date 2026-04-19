@@ -56,6 +56,13 @@ onepasswordSecrets:
       - envVar: HOME_ASSISTANT_TOKEN
         secretKey: credential
 
+  - name: adguard-hasos-basic-auth
+    enabled: true
+    itemPath: "vaults/home-gitops/items/Home Asisstant Examplenet - Basic Credentials"
+    env:
+      - envVar: HOME_ASSISTANT_BASIC_AUTH_B64
+        secretKey: credential
+
   - name: adguard-basic-auth
     enabled: true
     itemPath: "vaults/home-gitops/items/Adguard Home - Basic Creds"
@@ -142,7 +149,29 @@ config: |
         - "[STATUS] == 200"
       interval: 5m
 
-    - name: AdGuard Home
+    - name: AdGuard Home Sync
+      group: Example.Net Infrastructure
+      url: https://adguard-sync.example.net/api/v1/status
+      method: GET
+      client:
+        timeout: 10s
+      conditions:
+        - "[STATUS] == 200"
+        - "[BODY].status == success"
+
+    - name: AdGuard Home (HAOS)
+      group: Example.Net Infrastructure
+      url: https://adguard.example.net/control/status
+      method: GET
+      client:
+        timeout: 10s
+      headers:
+        Authorization: "Basic $HOME_ASSISTANT_BASIC_AUTH_B64"
+      conditions:
+        - "[STATUS] == 200"
+      interval: 5m
+
+    - name: AdGuard Home (Cluster)
       group: Example.Net Infrastructure
       url: https://adguard1.example.net/control/status
       method: GET
