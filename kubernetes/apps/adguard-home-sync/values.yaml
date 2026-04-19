@@ -66,8 +66,8 @@ onepasswordSecrets:
     itemPath: "vaults/home-gitops/items/adguard home"
     autoRestart: "true"
     env:
-      - envVar: REPLLICA1_USERNAME
+      - envVar: REPLICA1_USERNAME
         secretKey: username
-      - envVar: REPLLICA1_PASSWORD
+      - envVar: REPLICA1_PASSWORD
         secretKey: password
 
