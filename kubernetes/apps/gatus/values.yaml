@@ -151,13 +151,12 @@ config: |
 
     - name: AdGuard Home Sync
       group: Example.Net Infrastructure
-      url: https://adguard-sync.example.net/api/v1/status
+      url: https://adguard-sync.example.net/healthz
       method: GET
       client:
         timeout: 10s
       conditions:
         - "[STATUS] == 200"
-        - "[BODY].status == success"
 
     - name: AdGuard Home (HAOS)
       group: Example.Net Infrastructure
