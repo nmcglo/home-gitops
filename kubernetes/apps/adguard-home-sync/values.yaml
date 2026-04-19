@@ -14,16 +14,20 @@ service:
   port: 8080
   targetPort: 8080
 
+env:
+  ORIGIN_URL: "https://adguard.example.net" # home assistant
+  REPLICA1_URL: "https://adguard1.example.net" # example.net cluster
+
 # adguardhome-sync configuration - rendered into a config YAML file
 config:
   # Origin (primary) AdGuard Home instance
-  origin:
-    url: "https://adguard.example.net" # home assistant
+  # origin:
+    # url: "https://adguard.example.net" # home assistant
     # username: ""
     # password: ""
   # Replica instances to sync to
-  replicas:
-    - url: "https://adguard1.example.net" # example.net cluster
+  # replicas:
+    # - url: "https://adguard1.example.net" # example.net cluster
       # username: ""
       # password: ""
   # Cron schedule for sync (empty = sync only on demand)
@@ -33,8 +37,8 @@ config:
   # Web API configuration
   api:
     port: 8080
-    username: ""
-    password: ""
+    # username: ""
+    # password: ""
 
 resources:
   limits:

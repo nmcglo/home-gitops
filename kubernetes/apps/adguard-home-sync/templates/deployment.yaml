@@ -40,6 +40,9 @@ spec:
           {{- end }}
           {{- end }}
           {{- end }}
+          {{- if .Values.env }}
+          {{- toYaml .Values.env | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: config
               mountPath: /config
