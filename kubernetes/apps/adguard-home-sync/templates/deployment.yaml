@@ -23,7 +23,7 @@ spec:
             - /config/adguardhome-sync.yaml
           ports:
             - name: http
-              containerPort: {{ .Values.service.targetPort }}
+              containerPort: {{ .Values.service.ports.http.targetPort }}
               protocol: TCP
           {{- if .Values.onepasswordSecrets }}
           env:
