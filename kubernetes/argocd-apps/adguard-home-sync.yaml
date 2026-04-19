@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: adguard-home-sync
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com/nmcglo/home-infra.git
+    targetRevision: HEAD
+    path: kubernetes/apps/adguard-home-sync
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: adguard-home-sync
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true

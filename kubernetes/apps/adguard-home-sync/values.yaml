@@ -1,0 +1,67 @@
+namespace:
+  create: true
+  name: adguard-home-sync
+
+image:
+  repository: ghcr.io/bakito/adguardhome-sync
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicas: 1
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+# adguardhome-sync configuration - rendered into a config YAML file
+config:
+  # Origin (primary) AdGuard Home instance
+  origin:
+    url: "https://adguard.example.net" # home assistant
+    # username: ""
+    # password: ""
+  # Replica instances to sync to
+  replicas:
+    - url: "https://adguard1.example.net" # example.net cluster
+      # username: ""
+      # password: ""
+  # Cron schedule for sync (empty = sync only on demand)
+  cron: "*/10 * * * *"
+  # Run sync immediately on startup
+  runOnStart: true
+  # Web API configuration
+  api:
+    port: 8080
+    username: ""
+    password: ""
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+
+onepasswordSecrets:
+  - name: adguard-sync-origin-creds
+    enabled: true
+    itemPath: "vaults/home-gitops/items/Home Asisstant Examplenet - Basic Credentials"
+    autoRestart: "true"
+    env:
+      - envVar: ORIGIN_USERNAME
+        secretKey: username
+      - envVar: ORIGIN_PASSWORD
+        secretKey: password
+  - name: adguard-sync-replica-creds
+    enabled: true
+    itemPath: "vaults/home-gitops/items/adguard home"
+    autoRestart: "true"
+    env:
+      - envVar: REPLLICA1_USERNAME
+        secretKey: username
+      - envVar: REPLLICA1_PASSWORD
+        secretKey: password
+
