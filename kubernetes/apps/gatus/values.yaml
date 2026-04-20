@@ -76,6 +76,12 @@ onepasswordSecrets:
     env:
       - envVar: PAPERLESS_API_TOKEN
         secretKey: credential
+  - name: homeassistant-webhook
+    enabled: true
+    itemPath: "vaults/home-gitops/HomeAssistant - gatus status webhook"
+    env:
+      - envVar: HOME_ASSISTANT_WEBHOOK_URL
+        secretKey: URL
 
 # Gatus configuration - see https://github.com/TwiN/gatus for full reference
 config: |
@@ -89,6 +95,27 @@ config: |
   ui:
     title: "Status"
     header: "Status"
+
+  alerting:
+    webhook:
+      url: "$HOME_ASSISTANT_WEBHOOK_URL"
+      method: POST
+      body: |
+        {
+          "endpoint": "[ENDPOINT_NAME]",
+          "group": "[ENDPOINT_GROUP]",
+          "url": "[ENDPOINT_URL]",
+          "status": "[ALERT_TRIGGERED_OR_RESOLVED]",
+          "description": "[ALERT_DESCRIPTION]"
+        }
+      headers:
+        Content-Type: application/json
+      default-alert:
+        description: "Service health check failed"
+        failure-threshold: 2
+        success-threshold: 1
+        send-on-resolved: true
+        enabled: true
 
   endpoints:
     - name: Longhorn
