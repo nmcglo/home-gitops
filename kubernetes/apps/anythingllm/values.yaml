@@ -16,6 +16,7 @@ replicas: 1
 
 env:
   STORAGE_DIR: "/app/server/storage"
+  DISABLE_TELEMETRY: "true"
   # LLM_PROVIDER: "ollama"
   # OLLAMA_BASE_PATH: "http://ollama:11434"
   # EMBEDDING_ENGINE: "native"
