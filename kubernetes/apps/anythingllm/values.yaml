@@ -1,0 +1,28 @@
+# Default values for anythingllm
+
+namespace: anythingllm
+
+image:
+  repository: mintplexlabs/anythingllm
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 3001
+  targetPort: 3001
+
+replicas: 1
+
+env:
+  STORAGE_DIR: "/app/server/storage"
+  # LLM_PROVIDER: "ollama"
+  # OLLAMA_BASE_PATH: "http://ollama:11434"
+  # EMBEDDING_ENGINE: "native"
+  # JWT_SECRET: "changeme"
+
+persistence:
+  enabled: true
+  storageClassName: longhorn
+  accessMode: ReadWriteMany
+  size: 10Gi
