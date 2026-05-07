@@ -16,6 +16,23 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
+      {{- if .Values.tls.selfSigned.enabled }}
+      initContainers:
+      - name: gen-tls-cert
+        image: {{ .Values.tls.selfSigned.initImage }}
+        command:
+        - sh
+        - -c
+        - |
+          apk add --no-cache openssl
+          openssl req -x509 -newkey rsa:2048 -nodes -days 3650 \
+            -keyout /certs/tls.key \
+            -out /certs/tls.crt \
+            -subj "/CN={{ .Release.Name }}"
+        volumeMounts:
+        - name: tls-certs
+          mountPath: /certs
+      {{- end }}
       containers:
       - name: actual-budget
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -23,7 +40,7 @@ spec:
         ports:
         - containerPort: {{ .Values.service.targetPort }}
           name: http
-        {{- if or .Values.env .Values.onepasswordSecrets }}
+        {{- if or .Values.env .Values.onepasswordSecrets .Values.tls.selfSigned.enabled }}
         env:
         {{- range .Values.env }}
         - name: {{ .name }}
@@ -41,14 +58,28 @@ spec:
         {{- end }}
         {{- end }}
         {{- end }}
+        {{- if .Values.tls.selfSigned.enabled }}
+        - name: ACTUAL_HTTPS_CERT
+          value: "/certs/tls.crt"
+        - name: ACTUAL_HTTPS_KEY
+          value: "/certs/tls.key"
+        {{- end }}
         {{- end }}
         volumeMounts:
         - name: data
           mountPath: /data
+        {{- if .Values.tls.selfSigned.enabled }}
+        - name: tls-certs
+          mountPath: /certs
+          readOnly: true
+        {{- end }}
         livenessProbe:
           httpGet:
             path: /
             port: http
+            {{- if .Values.tls.selfSigned.enabled }}
+            scheme: HTTPS
+            {{- end }}
           initialDelaySeconds: 10
           periodSeconds: 30
           timeoutSeconds: 5
@@ -57,6 +88,9 @@ spec:
           httpGet:
             path: /
             port: http
+            {{- if .Values.tls.selfSigned.enabled }}
+            scheme: HTTPS
+            {{- end }}
           initialDelaySeconds: 5
           periodSeconds: 10
           timeoutSeconds: 5
@@ -72,5 +106,9 @@ spec:
           claimName: {{ .Release.Name }}-pvc
       {{- else }}
       - name: data
+        emptyDir: {}
+      {{- end }}
+      {{- if .Values.tls.selfSigned.enabled }}
+      - name: tls-certs
         emptyDir: {}
       {{- end }}

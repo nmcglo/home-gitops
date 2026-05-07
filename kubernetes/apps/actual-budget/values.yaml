@@ -42,6 +42,15 @@ resources: {}
 #
 onepasswordSecrets: []
 
+# Self-signed TLS certificate for HTTPS.
+# When enabled, an init container generates a cert into an emptyDir volume on each pod
+# start. The app is configured via ACTUAL_HTTPS_CERT / ACTUAL_HTTPS_KEY as described at
+# https://actualbudget.org/docs/config/https
+tls:
+  selfSigned:
+    enabled: true
+    initImage: alpine:3
+
 # Additional environment variables to set on the container
 env: []
   # - name: ACTUAL_LOGIN_PASSWORD
