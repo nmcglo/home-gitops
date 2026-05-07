@@ -1,0 +1,48 @@
+namespace: actual-budget
+
+revisionHistoryLimit: 2
+
+image:
+  repository: actualbudget/actual-server
+  tag: "25.4.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 5006
+  targetPort: 5006
+  loadBalancerIP: ""  # Set to a specific IP for MetalLB static assignment, e.g. "192.168.100.25"
+
+persistence:
+  enabled: true
+  storageClass: "longhorn"
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+resources: {}
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # limits:
+  #   cpu: 500m
+  #   memory: 512Mi
+
+# 1Password operator managed secrets.
+# Each entry creates a OnePasswordItem which the operator syncs into a Kubernetes Secret
+# of the same name. Fields from that secret can then be mapped to environment variables.
+#
+# onepasswordSecrets:
+#   - name: actual-budget-secret    # Name of the OnePasswordItem (and resulting K8s Secret)
+#     enabled: true
+#     itemPath: "vaults/MyVault/items/ActualBudgetSecret"
+#     autoRestart: "true"           # Restart pod when secret changes (default: true)
+#     env:
+#       - envVar: ACTUAL_LOGIN_PASSWORD  # Environment variable name inside the container
+#         secretKey: password            # Field name within the 1Password item
+#
+onepasswordSecrets: []
+
+# Additional environment variables to set on the container
+env: []
+  # - name: ACTUAL_LOGIN_PASSWORD
+  #   value: ""
