@@ -4,7 +4,7 @@ revisionHistoryLimit: 2
 
 image:
   repository: actualbudget/actual-server
-  tag: "25.4.0"
+  tag: "26.5.0"
   pullPolicy: IfNotPresent
 
 service:
