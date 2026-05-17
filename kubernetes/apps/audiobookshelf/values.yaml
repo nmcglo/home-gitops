@@ -1,0 +1,60 @@
+namespace: audiobookshelf
+
+revisionHistoryLimit: 1
+
+image:
+  repository: advplyr/audiobookshelf
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 80
+  loadBalancerIP: ""  # Set to a specific IP for MetalLB static assignment, e.g. "192.168.100.30"
+
+# Each entry under persistence creates a separate PVC and volume mount.
+# storageClass: "" uses the cluster default; set to a named class (e.g. "longhorn", "nfs-client").
+# accessMode: ReadWriteOnce | ReadWriteMany | ReadOnlyMany
+persistence:
+  config:
+    enabled: true
+    storageClass: "longhorn"
+    accessMode: ReadWriteMany
+    size: 1Gi
+    mountPath: /config
+  metadata:
+    enabled: false
+    storageClass: "nfs"
+    accessMode: ReadWriteMany
+    size: 5Gi
+    mountPath: /metadata
+  media:
+    enabled: true
+    storageClass: "nfs"
+    accessMode: ReadWriteMany
+    size: 50Gi
+    mountPath: /media
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+# Additional environment variables to set on the container
+env:
+  - name: TZ
+    value: America/New_York
+  - name: METADATA_PATH
+    value: /metadata
+  - name: CONFIG_PATH
+    value: /config
+  - name: SOURCE
+    value: docker
+  # - name: AUDIOBOOKSHELF_UID
+  #   value: "1000"
+  # - name: AUDIOBOOKSHELF_GID
+  #   value: "1000"
