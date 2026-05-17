@@ -24,7 +24,7 @@ persistence:
     size: 1Gi
     mountPath: /config
   metadata:
-    enabled: false
+    enabled: true
     storageClass: "nfs"
     accessMode: ReadWriteMany
     size: 5Gi
