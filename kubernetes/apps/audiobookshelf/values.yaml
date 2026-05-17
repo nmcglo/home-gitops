@@ -33,7 +33,7 @@ persistence:
     enabled: true
     storageClass: "nfs"
     accessMode: ReadWriteMany
-    size: 50Gi
+    size: 200Gi
     mountPath: /media
 
 resources:
