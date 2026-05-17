@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: audiobookshelf
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com/nmcglo/home-infra.git
+    targetRevision: HEAD  # Uses default branch
+    path: kubernetes/apps/audiobookshelf
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: audiobookshelf
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
