@@ -364,3 +364,13 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+
+    - name: RK3588 llama.cpp
+      group: Local LLMs
+      url: https://rkllama.example.net/health
+      method: GET
+      client:
+        timeout: 10s
+      conditions:
+        - "[STATUS] == 200"
+      interval: 5m
