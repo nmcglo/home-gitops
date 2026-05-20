@@ -345,6 +345,16 @@ config: |
         - "[STATUS] == 200"
       interval: 5m
 
+    - name: Audiobookshelf
+      group: Home
+      url: https://books.example.net/status
+      method: GET
+      client:
+        timeout: 10s
+      conditions:
+        - "[STATUS] == 200"
+      interval: 5m
+
     - name: Open WebUI
       group: Local LLMs
       url: https://chat.example.net/
