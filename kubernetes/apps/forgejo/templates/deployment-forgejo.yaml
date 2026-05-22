@@ -44,8 +44,8 @@ spec:
                 -nodes \
                 -subj "/CN={{ .Values.forgejo.config.server.domain }}" \
                 -addext "subjectAltName=DNS:{{ .Values.forgejo.config.server.domain }}"
-              chmod 0:1000 /certs/cert.pem /certs/key.pem
-              chown g+r /certs/cert.pem /certs/key.pem
+              chown 0:1000 /certs/cert.pem /certs/key.pem
+              chmod g+r /certs/cert.pem /certs/key.pem
           volumeMounts:
             - name: tls-certs
               mountPath: /certs
