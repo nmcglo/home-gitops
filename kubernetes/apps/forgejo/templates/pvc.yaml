@@ -12,6 +12,7 @@ spec:
     requests:
       storage: {{ .Values.persistence.data.size }}
 {{- if and (eq .Values.database.type "postgres") .Values.database.postgres.internal }}
+{{- $pgdata := default dict .Values.persistence.pgdata }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -19,10 +20,10 @@ metadata:
   name: {{ .Release.Name }}-pgdata-pvc
   namespace: {{ .Values.namespace }}
 spec:
-  storageClassName: {{ .Values.persistence.pgdata.storageClassName }}
+  storageClassName: {{ $pgdata.storageClassName | default "longhorn" }}
   accessModes:
-    - {{ .Values.persistence.pgdata.accessMode }}
+    - {{ $pgdata.accessMode | default "ReadWriteOnce" }}
   resources:
     requests:
-      storage: {{ .Values.persistence.pgdata.size }}
+      storage: {{ $pgdata.size | default "10Gi" }}
 {{- end }}

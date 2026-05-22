@@ -36,6 +36,20 @@ forgejo:
     log:
       level: Info
 
+  # TLS — optional self-signed certificate generated at pod startup.
+  # When enabled, an init container runs openssl to produce a cert/key pair in
+  # an emptyDir volume, and Forgejo is configured to serve HTTPS directly.
+  # Disable this when TLS termination is handled upstream (e.g. nginx, cloudflared).
+  tls:
+    selfSigned:
+      enabled: true
+      # Validity period for the generated certificate in days
+      days: 3650
+      image:
+        repository: alpine
+        tag: "3"
+        pullPolicy: IfNotPresent
+
   # Additional environment variables injected into the Forgejo container.
   # Plain strings and valueFrom references are both supported (same syntax as
   # paperless-ngx extraEnv).

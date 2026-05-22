@@ -1,3 +1,5 @@
+{{- $waitForPostgres := and (eq .Values.database.type "postgres") .Values.database.postgres.internal }}
+{{- $genTlsCert := .Values.forgejo.tls.selfSigned.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -13,8 +15,9 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
-      {{- if and (eq .Values.database.type "postgres") .Values.database.postgres.internal }}
+      {{- if or $waitForPostgres $genTlsCert }}
       initContainers:
+        {{- if $waitForPostgres }}
         - name: wait-for-postgres
           image: busybox:1.36
           command:
@@ -24,6 +27,27 @@ spec:
               until nc -z {{ .Release.Name }}-postgres {{ .Values.database.postgres.port }}; do
                 echo "waiting for postgres..."; sleep 2
               done
+        {{- end }}
+        {{- if $genTlsCert }}
+        - name: generate-tls-cert
+          image: "{{ .Values.forgejo.tls.selfSigned.image.repository }}:{{ .Values.forgejo.tls.selfSigned.image.tag }}"
+          imagePullPolicy: {{ .Values.forgejo.tls.selfSigned.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              apk add --no-cache openssl
+              openssl req -x509 -newkey rsa:4096 \
+                -keyout /certs/key.pem \
+                -out /certs/cert.pem \
+                -days {{ .Values.forgejo.tls.selfSigned.days }} \
+                -nodes \
+                -subj "/CN={{ .Values.forgejo.config.server.domain }}" \
+                -addext "subjectAltName=DNS:{{ .Values.forgejo.config.server.domain }}"
+          volumeMounts:
+            - name: tls-certs
+              mountPath: /certs
+        {{- end }}
       {{- end }}
       containers:
         - name: forgejo
@@ -52,6 +76,14 @@ spec:
               value: {{ .Values.forgejo.config.server.disableSsh | quote }}
             - name: FORGEJO__SERVER__START_SSH_SERVER
               value: {{ .Values.forgejo.config.server.startSshServer | quote }}
+            {{- if $genTlsCert }}
+            - name: FORGEJO__SERVER__PROTOCOL
+              value: https
+            - name: FORGEJO__SERVER__CERT_FILE
+              value: /certs/cert.pem
+            - name: FORGEJO__SERVER__KEY_FILE
+              value: /certs/key.pem
+            {{- end }}
             # Security
             - name: FORGEJO__SECURITY__INSTALL_LOCK
               value: {{ .Values.forgejo.config.security.installLock | quote }}
@@ -77,7 +109,7 @@ spec:
             - name: FORGEJO__DATABASE__DB_TYPE
               value: sqlite3
             - name: FORGEJO__DATABASE__PATH
-              value: /data/gitea/gitea.db
+              value: /data/forgejo.db
             {{- else }}
             - name: FORGEJO__DATABASE__DB_TYPE
               value: postgres
@@ -115,7 +147,16 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+            {{- if $genTlsCert }}
+            - name: tls-certs
+              mountPath: /certs
+              readOnly: true
+            {{- end }}
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-data-pvc
+        {{- if $genTlsCert }}
+        - name: tls-certs
+          emptyDir: {}
+        {{- end }}
