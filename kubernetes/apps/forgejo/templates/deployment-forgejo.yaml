@@ -77,7 +77,7 @@ spec:
             - name: FORGEJO__DATABASE__DB_TYPE
               value: sqlite3
             - name: FORGEJO__DATABASE__PATH
-              value: /data/forgejo.db
+              value: /data/gitea/gitea.db
             {{- else }}
             - name: FORGEJO__DATABASE__DB_TYPE
               value: postgres
