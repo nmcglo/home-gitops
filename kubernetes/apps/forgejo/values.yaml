@@ -19,7 +19,7 @@ forgejo:
       sshPort: 22
       # sshListenPort is the port Forgejo's SSH server listens on inside the container;
       # service.ssh.targetPort should match this value
-      sshListenPort: 22
+      sshListenPort: 2222
       disableSsh: false
       # startSshServer must be true in Kubernetes (no host SSH daemon available)
       startSshServer: true
@@ -80,7 +80,7 @@ service:
     enabled: true
     port: 22
     # targetPort must match forgejo.config.server.sshListenPort
-    targetPort: 22
+    targetPort: 2222
 
 persistence:
   data:
