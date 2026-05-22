@@ -5,7 +5,7 @@ namespace: forgejo
 forgejo:
   image:
     repository: codeberg.org/forgejo/forgejo
-    tag: "10"
+    tag: "15"
     pullPolicy: IfNotPresent
 
   config:
@@ -29,7 +29,7 @@ forgejo:
         valueFrom:
           secretKeyRef:
             name: forgejo-secret-key
-            key: value
+            key: FORGEJO__SECURITY__SECRET_KEY
       installLock: true
     repository:
       root: /data/git/repositories
