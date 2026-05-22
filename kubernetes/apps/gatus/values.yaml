@@ -229,6 +229,16 @@ config: |
         - "[STATUS] == 200"
       interval: 5m
 
+    - name: Forgejo
+      group: Example.Net Infrastructure
+      url: https://forgejo.example.net/api/v1/version
+      method: GET
+      client:
+        timeout: 10s
+      conditions:
+        - "[STATUS] == 200"
+      interval: 5m
+
     # - name: Grafana
     #   group: Example.Net Infrastructure
     #   url: https://grafana.example.net/api/health
