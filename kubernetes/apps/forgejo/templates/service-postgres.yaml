@@ -1,0 +1,15 @@
+{{- if and (eq .Values.database.type "postgres") .Values.database.postgres.internal }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-postgres
+  namespace: {{ .Values.namespace }}
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: {{ .Values.database.postgres.port }}
+      targetPort: 5432
+  selector:
+    app: {{ .Release.Name }}-postgres
+{{- end }}

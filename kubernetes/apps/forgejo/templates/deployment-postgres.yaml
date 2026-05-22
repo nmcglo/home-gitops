@@ -1,0 +1,44 @@
+{{- if and (eq .Values.database.type "postgres") .Values.database.postgres.internal }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-postgres
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-postgres
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: "{{ .Values.database.postgres.image.repository }}:{{ .Values.database.postgres.image.tag }}"
+          imagePullPolicy: {{ .Values.database.postgres.image.pullPolicy }}
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.database.postgres.name | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.database.postgres.user | quote }}
+            - name: POSTGRES_PASSWORD
+              {{- if kindIs "string" .Values.database.postgres.password }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-postgres-secret
+                  key: POSTGRES_PASSWORD
+              {{- else }}
+              {{- toYaml .Values.database.postgres.password | nindent 14 }}
+              {{- end }}
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: pgdata
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-pgdata-pvc
+{{- end }}

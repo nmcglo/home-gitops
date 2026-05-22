@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-data-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  storageClassName: {{ .Values.persistence.data.storageClassName }}
+  accessModes:
+    - {{ .Values.persistence.data.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.data.size }}
+{{- if and (eq .Values.database.type "postgres") .Values.database.postgres.internal }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-pgdata-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  storageClassName: {{ .Values.persistence.pgdata.storageClassName }}
+  accessModes:
+    - {{ .Values.persistence.pgdata.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.pgdata.size }}
+{{- end }}
