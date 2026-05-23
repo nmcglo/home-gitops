@@ -1,5 +1,8 @@
 {{- $waitForPostgres := and (eq .Values.database.type "postgres") .Values.database.postgres.internal }}
-{{- $genTlsCert := .Values.forgejo.tls.selfSigned.enabled }}
+{{- $selfSigned   := .Values.forgejo.tls.selfSigned.enabled }}
+{{- $certManager  := .Values.forgejo.tls.certManager.enabled }}
+{{- $tlsEnabled   := or $selfSigned $certManager }}
+{{- $certSecretName := .Values.forgejo.tls.certManager.secretName | default (printf "%s-tls-cert" .Release.Name) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,7 +18,7 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
-      {{- if or $waitForPostgres $genTlsCert }}
+      {{- if or $waitForPostgres $selfSigned }}
       initContainers:
         {{- if $waitForPostgres }}
         - name: wait-for-postgres
@@ -28,7 +31,7 @@ spec:
                 echo "waiting for postgres..."; sleep 2
               done
         {{- end }}
-        {{- if $genTlsCert }}
+        {{- if $selfSigned }}
         - name: generate-tls-cert
           image: "{{ .Values.forgejo.tls.selfSigned.image.repository }}:{{ .Values.forgejo.tls.selfSigned.image.tag }}"
           imagePullPolicy: {{ .Values.forgejo.tls.selfSigned.image.pullPolicy }}
@@ -78,13 +81,21 @@ spec:
               value: {{ .Values.forgejo.config.server.disableSsh | quote }}
             - name: FORGEJO__SERVER__START_SSH_SERVER
               value: {{ .Values.forgejo.config.server.startSshServer | quote }}
-            {{- if $genTlsCert }}
+            {{- if $tlsEnabled }}
             - name: FORGEJO__SERVER__PROTOCOL
               value: https
             - name: FORGEJO__SERVER__CERT_FILE
+              {{- if $selfSigned }}
               value: /certs/cert.pem
+              {{- else }}
+              value: /certs/tls.crt
+              {{- end }}
             - name: FORGEJO__SERVER__KEY_FILE
+              {{- if $selfSigned }}
               value: /certs/key.pem
+              {{- else }}
+              value: /certs/tls.key
+              {{- end }}
             {{- end }}
             # Security
             - name: FORGEJO__SECURITY__INSTALL_LOCK
@@ -158,7 +169,7 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
-            {{- if $genTlsCert }}
+            {{- if $tlsEnabled }}
             - name: tls-certs
               mountPath: /certs
               readOnly: true
@@ -167,7 +178,12 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-data-pvc
-        {{- if $genTlsCert }}
+        {{- if $tlsEnabled }}
         - name: tls-certs
+          {{- if $selfSigned }}
           emptyDir: {}
+          {{- else }}
+          secret:
+            secretName: {{ $certSecretName }}
+          {{- end }}
         {{- end }}

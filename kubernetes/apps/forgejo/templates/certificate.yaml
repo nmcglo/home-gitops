@@ -1,0 +1,24 @@
+{{- if .Values.forgejo.tls.certManager.enabled }}
+{{- $secretName := .Values.forgejo.tls.certManager.secretName | default (printf "%s-tls-cert" .Release.Name) }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Release.Name }}-tls
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  secretName: {{ $secretName }}
+  duration: {{ .Values.forgejo.tls.certManager.duration | quote }}
+  renewBefore: {{ .Values.forgejo.tls.certManager.renewBefore | quote }}
+  dnsNames:
+    - {{ .Values.forgejo.config.server.domain }}
+{{- if not .Values.foregejo.config.server.disableSsh }}
+    - {{ .Values.forgejo.config.server.sshDomain }}
+{{- end }}
+  issuerRef:
+    name: {{ .Values.forgejo.tls.certManager.issuerRef.name | quote }}
+    kind: {{ .Values.forgejo.tls.certManager.issuerRef.kind }}
+    group: {{ .Values.forgejo.tls.certManager.issuerRef.group }}
+{{- end }}

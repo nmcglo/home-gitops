@@ -45,15 +45,35 @@ forgejo:
   # When enabled, an init container runs openssl to produce a cert/key pair in
   # an emptyDir volume, and Forgejo is configured to serve HTTPS directly.
   # Disable this when TLS termination is handled upstream (e.g. nginx, cloudflared).
+  # TLS — choose at most one mode. selfSigned and certManager are mutually exclusive.
   tls:
+    # selfSigned: init container runs openssl at pod startup and writes a cert/key
+    # pair into an emptyDir volume. Good for internal/homelab use with no CA.
     selfSigned:
-      enabled: true
+      enabled: false
       # Validity period for the generated certificate in days
       days: 3650
       image:
         repository: alpine
         tag: "3"
         pullPolicy: IfNotPresent
+    # certManager: creates a cert-manager Certificate resource and mounts the
+    # resulting Secret into the Forgejo container. Requires cert-manager to be
+    # installed in the cluster.
+    certManager:
+      enabled: true
+      # issuerRef identifies the cert-manager Issuer or ClusterIssuer to use
+      issuerRef:
+        name: "letsencrypt-prod"
+        # kind: ClusterIssuer | Issuer
+        kind: ClusterIssuer
+        group: cert-manager.io
+      # secretName is the Kubernetes Secret cert-manager will create/manage.
+      # Defaults to <release-name>-tls-cert if left empty.
+      secretName: "forgejo-example-net-cert"
+      # duration and renewBefore use Go duration strings (e.g. "2160h" = 90 days)
+      duration:
+      renewBefore:
 
   # Additional environment variables injected into the Forgejo container.
   # Plain strings and valueFrom references are both supported (same syntax as
