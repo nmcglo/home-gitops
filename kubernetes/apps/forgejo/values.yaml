@@ -39,7 +39,7 @@ forgejo:
       # enabled toggles the LFS server endpoint (FORGEJO__SERVER__LFS_START_SERVER)
       enabled: true
       # path where LFS objects are stored; lives inside the data PVC
-      path: /data/lfs
+      path: /data/git/lfs
 
   # TLS — optional self-signed certificate generated at pod startup.
   # When enabled, an init container runs openssl to produce a cert/key pair in
