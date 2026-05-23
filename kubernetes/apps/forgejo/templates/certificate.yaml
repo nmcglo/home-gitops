@@ -14,7 +14,7 @@ spec:
   renewBefore: {{ .Values.forgejo.tls.certManager.renewBefore | quote }}
   dnsNames:
     - {{ .Values.forgejo.config.server.domain }}
-{{- if not .Values.foregejo.config.server.disableSsh }}
+{{- if not .Values.forgejo.config.server.disableSsh }}
     - {{ .Values.forgejo.config.server.sshDomain }}
 {{- end }}
   issuerRef:
