@@ -113,7 +113,7 @@ database:
 service:
   type: LoadBalancer
   web:
-    port: 3000
+    port: 443
     targetPort: 3000
   ssh:
     enabled: true
