@@ -132,7 +132,7 @@ service:
     enabled: true
     port: 22
     # targetPort must match forgejo.config.server.sshListenPort
-    targetPort: 2222
+    targetPort: 22
 
 persistence:
   data:
