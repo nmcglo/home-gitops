@@ -8,6 +8,18 @@ forgejo:
     tag: "15"
     pullPolicy: IfNotPresent
 
+  # strategy controls the Deployment rollout strategy.
+  # Recreate (default) terminates the old pod before starting the new one —
+  # required when the data PVC uses ReadWriteOnce.
+  # RollingUpdate keeps a fraction of old pods alive during the transition;
+  # only safe if the PVC uses ReadWriteMany or you accept brief dual-access.
+  strategy:
+    type: Recreate
+    # rollingUpdate is only applied when type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 1
+    #   maxUnavailable: 0
+
   config:
     server:
       domain: "forgejo.example.net"
