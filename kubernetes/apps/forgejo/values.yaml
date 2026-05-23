@@ -78,7 +78,8 @@ forgejo:
   # Additional environment variables injected into the Forgejo container.
   # Plain strings and valueFrom references are both supported (same syntax as
   # paperless-ngx extraEnv).
-  extraEnv: {}
+  extraEnv:
+    USE_COMPAT_SSH_URI: "False"
 
 # Database configuration
 # database.type: sqlite | postgres
