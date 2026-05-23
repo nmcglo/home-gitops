@@ -31,10 +31,10 @@ forgejo:
       sshPort: 22
       # sshListenPort is the port Forgejo's SSH server listens on inside the container;
       # service.ssh.targetPort should match this value
-      sshListenPort: 2222
+      sshListenPort: 22
       disableSsh: false
       # startSshServer must be true in Kubernetes (no host SSH daemon available)
-      startSshServer: true
+      startSshServer: false
     security:
       # Change this to a long random string before deploying
       secretKey:
