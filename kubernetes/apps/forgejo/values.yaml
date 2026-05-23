@@ -91,7 +91,7 @@ forgejo:
   # Plain strings and valueFrom references are both supported (same syntax as
   # paperless-ngx extraEnv).
   extraEnv:
-    USE_COMPAT_SSH_URI: "False"
+    USE_COMPAT_SSH_URI: "false"
 
 # Database configuration
 # database.type: sqlite | postgres
