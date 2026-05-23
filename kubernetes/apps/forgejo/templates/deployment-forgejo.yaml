@@ -106,6 +106,15 @@ spec:
               value: console
             - name: FORGEJO__LOG__LEVEL
               value: {{ .Values.forgejo.config.log.level | quote }}
+            # LFS
+            - name: FORGEJO__SERVER__LFS_START_SERVER
+              value: {{ .Values.forgejo.config.lfs.enabled | quote }}
+            {{- if .Values.forgejo.config.lfs.enabled }}
+            - name: FORGEJO__LFS__STORAGE_TYPE
+              value: local
+            - name: FORGEJO__LFS__PATH
+              value: {{ .Values.forgejo.config.lfs.path | quote }}
+            {{- end }}
             # Database
             {{- if eq .Values.database.type "sqlite" }}
             - name: FORGEJO__DATABASE__DB_TYPE
