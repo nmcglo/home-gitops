@@ -80,6 +80,10 @@ tika:
     tag: "3.2.3.0"
     pullPolicy: IfNotPresent
 
+exporter:
+  enabled: false
+  schedule: "0 2 * * *"
+
 service:
   type: LoadBalancer
   port: 8000

@@ -1,0 +1,76 @@
+{{- if .Values.exporter.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-exporter
+  namespace: {{ .Values.namespace }}
+spec:
+  schedule: {{ .Values.exporter.schedule | quote }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: exporter
+              image: "{{ .Values.paperless.image.repository }}:{{ .Values.paperless.image.tag }}"
+              imagePullPolicy: {{ .Values.paperless.image.pullPolicy }}
+              command: ["document_exporter", "{{ .Values.paperless.mountPaths.media }}/export"]
+              env:
+                - name: PAPERLESS_CONSUMPTION_DIR
+                  value: {{ .Values.paperless.mountPaths.consume }}
+                - name: PAPERLESS_MEDIA_ROOT
+                  value: {{ .Values.paperless.mountPaths.media }}
+                - name: PAPERLESS_DATA_DIR
+                  value: {{ .Values.paperless.mountPaths.data }}
+                - name: PAPERLESS_REDIS
+                  value: "redis://{{ .Release.Name }}-redis:6379"
+                - name: PAPERLESS_DBHOST
+                  value: "{{ .Release.Name }}-postgres"
+                - name: PAPERLESS_DBNAME
+                  value: {{ .Values.postgres.database | quote }}
+                - name: PAPERLESS_DBUSER
+                  {{- if kindIs "string" .Values.postgres.user }}
+                  value: {{ .Values.postgres.user | quote }}
+                  {{- else }}
+                  {{- toYaml .Values.postgres.user | nindent 18 }}
+                  {{- end }}
+                - name: PAPERLESS_DBPASS
+                  {{- if kindIs "string" .Values.postgres.password }}
+                  value: {{ .Values.postgres.password | quote }}
+                  {{- else }}
+                  {{- toYaml .Values.postgres.password | nindent 18 }}
+                  {{- end }}
+                - name: PAPERLESS_TIKA_ENABLED
+                  value: "1"
+                - name: PAPERLESS_TIKA_GOTENBERG_ENDPOINT
+                  value: "http://{{ .Release.Name }}-gotenberg:3000"
+                - name: PAPERLESS_TIKA_ENDPOINT
+                  value: "http://{{ .Release.Name }}-tika:9998"
+                {{- range $key, $value := .Values.paperless.env }}
+                - name: {{ $key }}
+                  {{- if kindIs "string" $value }}
+                  value: {{ $value | quote }}
+                  {{- else }}
+                  {{- toYaml $value | nindent 18 }}
+                  {{- end }}
+                {{- end }}
+              volumeMounts:
+                - name: media
+                  mountPath: {{ .Values.paperless.mountPaths.media }}
+                - name: data
+                  mountPath: {{ .Values.paperless.mountPaths.data }}
+                - name: consume
+                  mountPath: {{ .Values.paperless.mountPaths.consume }}
+          volumes:
+            - name: media
+              persistentVolumeClaim:
+                claimName: {{ .Release.Name }}-media-pvc
+            - name: data
+              persistentVolumeClaim:
+                claimName: {{ .Release.Name }}-data-pvc
+            - name: consume
+              persistentVolumeClaim:
+                claimName: {{ .Release.Name }}-consume-pvc
+{{- end }}
