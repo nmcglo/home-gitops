@@ -81,7 +81,7 @@ tika:
     pullPolicy: IfNotPresent
 
 exporter:
-  enabled: false
+  enabled: true
   schedule: "0 2 * * *"
 
 service:
