@@ -23,9 +23,9 @@ spec:
             - name: PAPERLESS_CONSUMPTION_DIR
               value: {{ .Values.paperless.mountPaths.consume }}
             - name: PAPERLESS_MEDIA_ROOT
-              value: {{ .Values.paperless.mountPaths.media }}/media
+              value: {{ .Values.paperless.mountPaths.media }}
             - name: PAPERLESS_DATA_DIR
-              value: {{ .Values.paperless.mountPaths.data }}/data
+              value: {{ .Values.paperless.mountPaths.data }}
             - name: PAPERLESS_REDIS
               value: "redis://{{ .Release.Name }}-redis:6379"
             - name: PAPERLESS_DBHOST
