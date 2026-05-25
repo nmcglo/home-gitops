@@ -23,28 +23,27 @@ spec:
             - name: PAPERLESS_CONSUMPTION_DIR
               value: {{ .Values.paperless.mountPaths.consume }}
             - name: PAPERLESS_MEDIA_ROOT
-              value: {{ .Values.paperless.mountPaths.mediaData }}/media
+              value: {{ .Values.paperless.mountPaths.media }}/media
             - name: PAPERLESS_DATA_DIR
-              value: {{ .Values.paperless.mountPaths.mediaData }}/data
+              value: {{ .Values.paperless.mountPaths.data }}/data
             - name: PAPERLESS_REDIS
               value: "redis://{{ .Release.Name }}-redis:6379"
             - name: PAPERLESS_DBHOST
               value: "{{ .Release.Name }}-postgres"
             - name: PAPERLESS_DBNAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}-postgres-secret
-                  key: POSTGRES_DB
+              value: {{ .Values.postgres.database | quote }}
             - name: PAPERLESS_DBUSER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}-postgres-secret
-                  key: POSTGRES_USER
+              {{- if kindIs "string" .Values.postgres.user }}
+              value: {{ .Values.postgres.user | quote }}
+              {{- else }}
+              {{- toYaml .Values.postgres.user | nindent 14 }}
+              {{- end }}
             - name: PAPERLESS_DBPASS
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}-postgres-secret
-                  key: POSTGRES_PASSWORD
+              {{- if kindIs "string" .Values.postgres.password }}
+              value: {{ .Values.postgres.password | quote }}
+              {{- else }}
+              {{- toYaml .Values.postgres.password | nindent 14 }}
+              {{- end }}
             - name: PAPERLESS_TIKA_ENABLED
               value: "1"
             - name: PAPERLESS_TIKA_GOTENBERG_ENDPOINT
@@ -60,14 +59,19 @@ spec:
               {{- end }}
             {{- end }}
           volumeMounts:
-            - name: media-data
-              mountPath: {{ .Values.paperless.mountPaths.mediaData }}
+            - name: media
+              mountPath: {{ .Values.paperless.mountPaths.media }}
+            - name: data
+              mountPath: {{ .Values.paperless.mountPaths.data }}
             - name: consume
               mountPath: {{ .Values.paperless.mountPaths.consume }}
       volumes:
-        - name: media-data
+        - name: media
           persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-media-data-pvc
+            claimName: {{ .Release.Name }}-media-pvc
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-data-pvc
         - name: consume
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-consume-pvc

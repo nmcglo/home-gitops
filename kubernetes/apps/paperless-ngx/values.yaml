@@ -11,6 +11,10 @@ onepasswordSecrets:
     enabled: true
     autoRestart: true
     itemPath: "vaults/home-gitops/items/paperless_ngx_admin_password"
+  - name: paperless-ngx-postgres
+    enabled: true
+    autoRestart: true
+    itemPath: "vaults/home-gitops/items/paperless_ngx_postgres"
 
 paperless:
   image:
@@ -36,7 +40,8 @@ paperless:
           key: PAPERLESS_SECRET_KEY
   mountPaths:
     consume: /mnt/consume
-    mediaData: /mnt/media_data
+    media: /mnt/media
+    data: /mnt/data
 
 postgres:
   image:
@@ -44,8 +49,17 @@ postgres:
     tag: "18.3"
     pullPolicy: IfNotPresent
   database: paperless
-  user: paperless
-  password: changeme
+  user:
+    valueFrom:
+      secretKeyRef:
+        name: paperless-ngx-postgres
+        key: POSTGRES_USER
+  password:
+    valueFrom:
+      secretKeyRef:
+        name: paperless-ngx-postgres
+        key: POSTGRES_PASSWORD
+
 redis:
   uid: 999
   gid: 999
@@ -76,10 +90,14 @@ persistence:
     storageClassName: longhorn
     accessMode: ReadWriteMany
     size: 5Gi
-  mediaData:
+  media:
+    storageClassName: nfs
+    accessMode: ReadWriteMany
+    size: 20Gi
+  data:
     storageClassName: longhorn
     accessMode: ReadWriteOnce
-    size: 20Gi
+    size: 5Gi
   pgdata:
     storageClassName: longhorn
     accessMode: ReadWriteOnce

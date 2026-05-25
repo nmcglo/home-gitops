@@ -19,9 +19,21 @@ spec:
           imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
           ports:
             - containerPort: 5432
-          envFrom:
-            - secretRef:
-                name: {{ .Release.Name }}-postgres-secret
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.postgres.database | quote }}
+            - name: POSTGRES_USER
+              {{- if kindIs "string" .Values.postgres.user }}
+              value: {{ .Values.postgres.user | quote }}
+              {{- else }}
+              {{- toYaml .Values.postgres.user | nindent 14 }}
+              {{- end }}
+            - name: POSTGRES_PASSWORD
+              {{- if kindIs "string" .Values.postgres.password }}
+              value: {{ .Values.postgres.password | quote }}
+              {{- else }}
+              {{- toYaml .Values.postgres.password | nindent 14 }}
+              {{- end }}
           volumeMounts:
             - name: pgdata
               mountPath: /var/lib/postgresql
