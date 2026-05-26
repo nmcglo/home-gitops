@@ -158,6 +158,20 @@ config: |
         - "[STATUS] == 200"
       interval: 5m
 
+    - name: cert-manager (controller)
+      group: Example.net Cluster Critical Components
+      url: "http://cert-manager.cert-manager.svc.cluster.local:9402/metrics"
+      interval: 5m
+      conditions:
+        - "[STATUS] == 200"
+
+    - name: cert-manager (webhook health)
+      group: Example.net Cluster Critical Components
+      url: "http://cert-manager-webhook.cert-manager.svc.cluster.local:9402/metrics"
+      interval: 5m
+      conditions:
+        - "[STATUS] == 200"
+
     - name: Garage S3 COS
       group: Example.Net Infrastructure
       url: https://garage.example.net/api/v2/GetClusterHealth
@@ -238,6 +252,21 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+
+    - name: Forgejo Certificate
+      group: Example.Net Infrastructure
+      url: "https://forgejo.example.net"
+      interval: 5m
+      conditions:
+        - "[STATUS] == 200"
+        - "[CERTIFICATE_EXPIRATION] > 120h"   # warn 5 days out
+
+    - name: Forgejo SSH
+      group: Example.Net Infrastructure
+      url: "tcp://forgejo.example.net:22"
+      interval: 5m
+      conditions:
+        - "[CONNECTED] == true"
 
     # - name: Grafana
     #   group: Example.Net Infrastructure
