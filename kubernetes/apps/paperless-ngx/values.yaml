@@ -82,7 +82,7 @@ tika:
 
 exporter:
   enabled: true
-  schedule: "0 19 * * *"
+  schedule: "0 21 * * *"
 
 service:
   type: LoadBalancer
