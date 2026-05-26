@@ -158,14 +158,14 @@ config: |
         - "[STATUS] == 200"
       interval: 5m
 
-    - name: Cert Manager (controller)
+    - name: Cert Manager -- Controller
       group: Example.net Cluster Critical Components
       url: "http://cert-manager.cert-manager.svc.cluster.local:9402/metrics"
       interval: 5m
       conditions:
         - "[STATUS] == 200"
 
-    - name: Cert Manager (webhook health)
+    - name: Cert Manager -- Webhook
       group: Example.net Cluster Critical Components
       url: "http://cert-manager-webhook.cert-manager.svc.cluster.local:9402/metrics"
       interval: 5m
