@@ -1,0 +1,6 @@
+apiVersion: v2
+name: stirling-pdf
+description: Stirling PDF - self-hosted PDF manipulation tool
+type: application
+version: 0.1.0
+appVersion: "latest"

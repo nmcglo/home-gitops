@@ -1,0 +1,32 @@
+# Default values for stirling-pdf
+
+namespace: stirling-pdf
+
+onepasswordSecrets: []
+# Example (enable if using login/security features):
+# - name: stirling-pdf-secret
+#   enabled: true
+#   autoRestart: true
+#   itemPath: "vaults/home-gitops/items/stirling_pdf_secret"
+
+image:
+  repository: ghcr.io/stirling-tools/stirling-pdf
+  tag: latest-fat
+  pullPolicy: IfNotPresent
+
+env:
+  LANGS: "en_US"
+  # Set to "true" and configure a users file if you want login
+  # SECURITY_ENABLELOGIN: "false"
+
+service:
+  type: LoadBalancer
+  port: 8080
+  targetPort: 8080
+  loadBalancerIP: ""
+
+
+persistence:
+  storageClassName: longhorn
+  accessMode: ReadWriteOnce
+  size: 2Gi
