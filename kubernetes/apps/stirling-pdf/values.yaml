@@ -16,6 +16,7 @@ image:
 
 env:
   LANGS: "en_US"
+  DISABLE_PIXEL: "true"
   # Set to "true" and configure a users file if you want login
   # SECURITY_ENABLELOGIN: "false"
 
