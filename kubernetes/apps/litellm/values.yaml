@@ -51,7 +51,7 @@ config:
     litellm_params:
       model: "custom_openai/qwen3.6:27b-mtp"
       api_base: "https://localai.example.net"
-      api_key: ""
+      api_key: "nokey"
   # general_settings:
     # database_url: "postgresql://litellm:$(POSTGRES_PASSWORD)@postgres:5432/litellm"
   # Example:
