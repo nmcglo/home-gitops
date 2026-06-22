@@ -34,6 +34,7 @@ config:
     litellm_params:
       model: "custom_openai/*"
       api_base: "https://localai.example.net/v1"
+      api_key: ""
   # Example:
   # - model_name: gpt-4
   #   litellm_params:
