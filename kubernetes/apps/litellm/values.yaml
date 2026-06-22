@@ -1,18 +1,13 @@
 namespace: litellm
 
 onepasswordSecrets:
-  - name: litellm-master-key
+  - name: litellm-secrets
     enabled: true
     autoRestart: true
     itemPath: "vaults/home-gitops/items/LiteLLM Master Key"
     env:
       - envVar: LITELLM_MASTER_KEY
         secretKey: credential
-  - name: postgres-password
-    enabled: true
-    autoRestart: true
-    itemPath: "vaults/home-gitops/items/LiteLLM Master Key"
-    env:
       - envVar: POSTGRES_PASSWORD
         secretKey: postgres_password
 
