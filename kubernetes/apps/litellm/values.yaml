@@ -14,7 +14,7 @@ onepasswordSecrets:
     itemPath: "vaults/home-gitops/items/LiteLLM Master Key"
     env:
       - envVar: POSTGRES_PASSWORD
-        secretKey: postgress_password
+        secretKey: postgres_password
 
 image:
   repository: ghcr.io/berriai/litellm
