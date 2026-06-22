@@ -18,8 +18,8 @@ env: {}
 
 service:
   type: LoadBalancer
-  port: 8000
-  targetPort: 8000
+  port: 4000
+  targetPort: 4000
   loadBalancerIP: ""
 
 persistence:
