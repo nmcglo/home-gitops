@@ -25,11 +25,18 @@ spec:
               value: {{ .Values.postgres.username | quote }}
             - name: POSTGRES_DB
               value: {{ .Values.postgres.database | quote }}
-            - name: POSTGRES_PASSWORD
+            {{- range .Values.onepasswordSecrets }}
+            {{- if .enabled }}
+            {{- $secretName := .name }}
+            {{- range .env }}
+            - name: {{ .envVar }}
               valueFrom:
                 secretKeyRef:
-                  name: postgres-password
-                  key: credential
+                  name: {{ $secretName }}
+                  key: {{ .secretKey }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
