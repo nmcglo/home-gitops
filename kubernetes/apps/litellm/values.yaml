@@ -8,6 +8,13 @@ onepasswordSecrets:
     env:
       - envVar: LITELLM_MASTER_KEY
         secretKey: credential
+  - name: postgres-password
+    enabled: true
+    autoRestart: true
+    itemPath: "vaults/home-gitops/items/LiteLLM Master Key"
+    env:
+      - envVar: POSTGRES_PASSWORD
+        secretKey: postgress_password
 
 image:
   repository: ghcr.io/berriai/litellm
@@ -27,6 +34,21 @@ persistence:
   accessMode: ReadWriteOnce
   size: 5Gi
 
+postgres:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: IfNotPresent
+  username: litellm
+  # Password stored in 1Password — set via POSTGRES_PASSWORD env var
+  database: litellm
+  port: 5432
+  storage:
+    storageClassName: longhorn
+    accessMode: ReadWriteOnce
+    size: 5Gi
+
 # LiteLLM configuration — mounted at /etc/litellm/config.yaml
 config:
   model_list:
@@ -35,6 +57,8 @@ config:
       model: "custom_openai/qwen3.6:27b-mtp"
       api_base: "https://localai.example.net/v1"
       api_key: ""
+  # general_settings:
+    # database_url: "postgresql://litellm:$(POSTGRES_PASSWORD)@postgres:5432/litellm"
   # Example:
   # - model_name: gpt-4
   #   litellm_params:

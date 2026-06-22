@@ -32,6 +32,10 @@ spec:
             {{- end }}
             {{- end }}
             {{- end }}
+            {{- if .Values.postgres.enabled }}
+            - name: DATABASE_URL
+              value: "postgresql://{{ .Values.postgres.username }}:$(POSTGRES_PASSWORD)@postgres:{{ .Values.postgres.port }}/{{ .Values.postgres.database }}"
+            {{- end }}
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               {{- if kindIs "string" $value }}
