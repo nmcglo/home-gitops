@@ -1,0 +1,36 @@
+namespace: litellm
+
+onepasswordSecrets:
+  - name: litellm-master-key
+    enabled: true
+    autoRestart: true
+    itemPath: "vaults/home-gitops/items/LiteLLM Master Key"
+    env:
+      - envVar: LITELLM_MASTER_KEY
+        secretKey: credential
+
+image:
+  repository: ghcr.io/berriai/litellm
+  tag: main-latest
+  pullPolicy: IfNotPresent
+
+env: {}
+
+service:
+  type: LoadBalancer
+  port: 8000
+  targetPort: 8000
+  loadBalancerIP: ""
+
+persistence:
+  storageClassName: longhorn
+  accessMode: ReadWriteOnce
+  size: 5Gi
+
+# LiteLLM configuration — mounted at /etc/litellm/config.yaml
+config:
+  model_list: []
+  # Example:
+  # - model_name: gpt-4
+  #   litellm_params:
+  #     model: openai/gpt-4
