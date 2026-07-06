@@ -17,7 +17,7 @@ spec:
 
         storageClass:
           name: nfs-nas-beta
-          provisionerName: cluster.local/nfs-nas-beta-provisioner
+          provisionerName: cluster.local/microk8s-nfs-nas-beta-provisioner-nfs-subdir-external-provis
           defaultClass: false
           accessModes: ReadWriteMany
           reclaimPolicy: Delete
