@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: onedev
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com/nmcglo/home-infra.git
+    targetRevision: HEAD  # Uses default branch
+    path: kubernetes/apps/onedev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: onedev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true

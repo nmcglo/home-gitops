@@ -1,0 +1,54 @@
+namespace: onedev
+
+revisionHistoryLimit: 1
+
+image:
+  repository: 1dev/server
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  loadBalancerIP: ""   # Set to a specific IP for MetalLB static assignment, e.g. "192.168.100.X"
+  http:
+    port: 6610
+    targetPort: 6610
+  ssh:
+    port: 6611
+    targetPort: 6611
+
+persistence:
+  enabled: true
+  storageClass: "longhorn"
+  accessMode: ReadWriteOnce
+  size: 50Gi
+
+resources:
+  requests:
+    cpu: "1"
+    memory: 2Gi
+  limits:
+    cpu: "2"
+    memory: 4Gi
+
+# 1Password operator managed secrets.
+# Each entry creates a OnePasswordItem which the operator syncs into a Kubernetes Secret
+# of the same name. Fields from that secret can then be mapped to environment variables.
+#
+# onepasswordSecrets:
+#   - name: onedev-secret
+#     enabled: true
+#     itemPath: "vaults/home-gitops/items/OneDev"
+#     autoRestart: "true"
+#     env:
+#       - envVar: hibernate_connection_username   # example: external MySQL DB creds
+#         secretKey: db-username
+#       - envVar: hibernate_connection_password
+#         secretKey: db-password
+#
+onepasswordSecrets: []
+
+# Additional environment variables to set on the container
+env: []
+  # - name: hibernate_connection_url
+  #   value: "jdbc:mysql://mysql-host:3306/onedev"

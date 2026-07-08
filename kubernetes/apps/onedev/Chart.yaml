@@ -1,0 +1,6 @@
+apiVersion: v2
+name: onedev
+description: OneDev - self-hosted Git server with CI/CD, kanban, and packages
+type: application
+version: 0.1.0
+appVersion: "latest"
