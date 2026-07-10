@@ -52,7 +52,7 @@ config:
       model: "openai/qwen3.6:27b-mtp"
       api_base: "https://localai.example.net"
       api_key: "nokey"
-      drop_params: true
+      allowed_openai_params: ["metadata", "reasoning_effort"]
   # general_settings:
     # database_url: "postgresql://litellm:$(POSTGRES_PASSWORD)@postgres:5432/litellm"
   # Example:
