@@ -47,12 +47,18 @@ postgres:
 # LiteLLM configuration — mounted at /etc/litellm/config.yaml
 config:
   model_list:
+  # - model_name: "qwen3.6:27b-mtp"
+  #   litellm_params:
+  #     model: "openai/qwen3.6:27b-mtp"
+  #     api_base: "https://localai.example.net"
+  #     api_key: "nokey"
+  #     allowed_openai_params: ["metadata", "reasoning_effort"]
   - model_name: "qwen3.6:27b-mtp"
     litellm_params:
       model: "openai/qwen3.6:27b-mtp"
-      api_base: "https://localai.example.net"
+      api_base: "https://llama.example.net"
       api_key: "nokey"
-      allowed_openai_params: ["metadata", "reasoning_effort"]
+      allowed_openai_params: ["reasoning_effort"]
   # general_settings:
     # database_url: "postgresql://litellm:$(POSTGRES_PASSWORD)@postgres:5432/litellm"
   # Example:
