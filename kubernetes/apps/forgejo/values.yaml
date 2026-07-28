@@ -93,7 +93,9 @@ forgejo:
   extraEnv:
     FORGEJO__REPOSITORY__USE_COMPAT_SSH_URI: "false"
     FORGEJO__security__REVERSE_PROXY_TRUSTED_PROXIES: "127.0.0.0/8,::1/128,192.168.100.14,192.168.100.28"
-    FORGEJO__oauth2__ENABLED: "true"
+    FORGEJO__service__ENABLE_REVERSE_PROXY_AUTHENTICATION: "true"
+    FORGEJO__service__ENABLE_REVERSE_PROXY_AUTHENTICATION_API: "true"
+
 
 # Database configuration
 # database.type: sqlite | postgres
