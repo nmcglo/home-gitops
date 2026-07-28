@@ -92,7 +92,7 @@ forgejo:
   # paperless-ngx extraEnv).
   extraEnv:
     FORGEJO__REPOSITORY__USE_COMPAT_SSH_URI: "false"
-    FORGEJO__security__REVERSE_PROXY_TRUSTED_PROXIES: "127.0.0.0/8,::1/128,192.168.100.14"
+    FORGEJO__security__REVERSE_PROXY_TRUSTED_PROXIES: "127.0.0.0/8,::1/128,192.168.100.14,192.168.100.28"
 
 # Database configuration
 # database.type: sqlite | postgres
