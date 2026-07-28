@@ -4,8 +4,8 @@ namespace: forgejo
 
 forgejo:
   image:
-    repository: codeberg.org/forgejo/forgejo
-    tag: "16"
+    repository: codeberg.org/forgejo-experimental/forgejo
+    tag: "16.0-test"
     pullPolicy: IfNotPresent
 
   # strategy controls the Deployment rollout strategy.
