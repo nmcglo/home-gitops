@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com/nmcglo/home-infra.git
+    repoURL: git@github.com/nmcglo/forgejo-local-helm.git
     targetRevision: HEAD
-    path: kubernetes/apps/forgejo
+    path: "."
   destination:
     server: https://kubernetes.default.svc
     namespace: forgejo
