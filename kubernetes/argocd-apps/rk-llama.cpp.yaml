@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com/nmcglo/home-infra.git
+    repoURL: git@forgejo.example.net:nmcglo/home-infra.git
     targetRevision: HEAD
     path: kubernetes/apps/rk-llama.cpp-server
   destination:
