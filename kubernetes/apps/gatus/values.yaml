@@ -414,12 +414,12 @@ config: |
         - "[STATUS] == 200"
       interval: 5m
 
-    - name: AnythingLLM
-      group: Local LLMs
-      url: https://anythingllm.example.net/api/ping
-      method: GET
-      client:
-        timeout: 10s
-      conditions:
-        - "[STATUS] == 200"
-      interval: 5m
+    # - name: AnythingLLM
+    #   group: Local LLMs
+    #   url: https://anythingllm.example.net/api/ping
+    #   method: GET
+    #   client:
+    #     timeout: 10s
+    #   conditions:
+    #     - "[STATUS] == 200"
+    #   interval: 5m
