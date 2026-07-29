@@ -127,6 +127,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: MetalLB
       group: Example.net Cluster Critical Components
@@ -137,6 +139,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: Traefik
       group: Example.net Cluster Critical Components
@@ -147,6 +151,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
     
     - name: 1Password Connect Operator
       group: Example.net Cluster Critical Components
@@ -157,6 +163,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: Cert Manager -- Controller
       group: Example.net Cluster Critical Components
@@ -164,6 +172,8 @@ config: |
       interval: 5m
       conditions:
         - "[STATUS] == 200"
+      alerts:
+        - type: webhook
 
     - name: Cert Manager -- Webhook
       group: Example.net Cluster Critical Components
@@ -171,6 +181,8 @@ config: |
       interval: 5m
       conditions:
         - "[STATUS] == 200"
+      alerts:
+        - type: webhook
 
     - name: Garage S3 COS
       group: Example.Net Infrastructure
@@ -179,6 +191,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: NGINX Proxy Manager
       group: Example.Net Infrastructure
@@ -189,6 +203,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: AdGuard Home Sync
       group: Example.Net Infrastructure
@@ -198,6 +214,8 @@ config: |
         timeout: 10s
       conditions:
         - "[STATUS] == 200"
+      alerts:
+        - type: webhook
 
     - name: AdGuard Home (HAOS)
       group: Example.Net Infrastructure
@@ -210,6 +228,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: AdGuard Home (Cluster)
       group: Example.Net Infrastructure
@@ -222,6 +242,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: ArgoCD
       group: Example.Net Infrastructure
@@ -232,6 +254,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: CNCF Distribution Registry
       group: Example.Net Infrastructure
@@ -242,6 +266,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: Forgejo
       group: Example.Net Infrastructure
@@ -252,6 +278,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: Forgejo Certificate
       group: Example.Net Infrastructure
@@ -260,6 +288,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
         - "[CERTIFICATE_EXPIRATION] > 120h"   # warn 5 days out
+      alerts:
+        - type: webhook
 
     - name: Forgejo SSH
       group: Example.Net Infrastructure
@@ -267,6 +297,8 @@ config: |
       interval: 5m
       conditions:
         - "[CONNECTED] == true"
+      alerts:
+        - type: webhook
 
     # - name: Grafana
     #   group: Example.Net Infrastructure
@@ -277,6 +309,8 @@ config: |
     #   conditions:
     #     - "[STATUS] == 200"
     #   interval: 5m
+    #   alerts:
+    #   - type: webhook
 
     # - name: Prometheus
     #   group: Example.Net Infrastructure
@@ -287,6 +321,8 @@ config: |
     #   conditions:
     #     - "[STATUS] == 200"
     #   interval: 5m
+    #   alerts:
+    #     - type: webhook
 
     - name: Jenkins
       group: Example.Net Infrastructure
@@ -297,6 +333,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
     
     - name: Jenkins Agent Servicing
       group: Example.Net Infrastructure
@@ -307,6 +345,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: Synology NAS DSM
       group: Home
@@ -318,6 +358,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: Home Assistant
       group: Home
@@ -331,6 +373,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
         - "[RESPONSE_TIME] < 1000"
+      alerts:
+        - type: webhook
 
     - name: Emby
       group: Home
@@ -341,6 +385,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: Kiwix
       group: Home
@@ -351,6 +397,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: Mealie
       group: Home
@@ -361,6 +409,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: Paperless-NGX
       group: Home
@@ -373,6 +423,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: TronByt Server
       group: Home
@@ -383,6 +435,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: Audiobookshelf
       group: Home
@@ -393,6 +447,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: Open WebUI
       group: Local LLMs
@@ -403,6 +459,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     - name: RK3588 llama.cpp
       group: Local LLMs
@@ -413,6 +471,8 @@ config: |
       conditions:
         - "[STATUS] == 200"
       interval: 5m
+      alerts:
+        - type: webhook
 
     # - name: AnythingLLM
     #   group: Local LLMs
@@ -423,3 +483,5 @@ config: |
     #   conditions:
     #     - "[STATUS] == 200"
     #   interval: 5m
+    #   alerts:
+    #     - type: webhook
