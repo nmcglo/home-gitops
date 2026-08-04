@@ -1,0 +1,6 @@
+apiVersion: v2
+name: homepage
+description: A modern, fully static, fast, secure, highly customizable application dashboard (gethomepage.dev)
+type: application
+version: 0.1.0
+appVersion: "latest"
