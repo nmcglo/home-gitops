@@ -1,4 +1,5 @@
 # Environment files with sensitive data
+.claude
 .env
 *.env
 !.env.example
