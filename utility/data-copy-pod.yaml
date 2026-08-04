@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: data-copy
+spec:
+  restartPolicy: Never
+  containers:
+    - name: copy
+      image: busybox
+      command: ["sh", "-c", "cp -av /source/media/. /dest/ && echo 'Done'"]
+      volumeMounts:
+        - name: source
+          mountPath: /source
+        - name: dest
+          mountPath: /dest
+      resources:
+        requests:
+          cpu: 500m
+          memory: 500Mi
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+  volumes:
+    - name: source
+      persistentVolumeClaim:
+        claimName: paperless-ngx-media-data-pvc
+    - name: dest
+      persistentVolumeClaim:
+        claimName: paperless-ngx-media-pvc
