@@ -194,7 +194,7 @@ config:
             description: Audiobook & podcast server
             widget:
               type: audiobookshelf
-              url: http://audiobookshelf.host.or.ip:port
+              url: https://books.example.net
               key: "{{HOMEPAGE_VAR_AUDIOBOOKSHELF_API_KEY}}"
 
         - Kiwix:
