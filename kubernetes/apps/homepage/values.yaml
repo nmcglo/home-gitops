@@ -175,7 +175,8 @@ config:
             widget:
               type: emby
               url: https://emby.example.net
-              key: "{{HOMEPAGE_VAR_EMBY_API_KEY}}"            
+              key: "{{HOMEPAGE_VAR_EMBY_API_KEY}}"
+              enableBlocks: true
 
         - Audiobookshelf:
             icon: audiobookshelf.png
