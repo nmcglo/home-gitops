@@ -37,6 +37,12 @@ resources: {}
 # HOMEPAGE_VAR_* environment variables, referenced from services.yaml as
 # "{{HOMEPAGE_VAR_NAME}}". Reuses the same 1Password items as the gatus chart.
 onepasswordSecrets:
+  - name: emby-api-key
+    enabled: true
+    itemPath: "vaults/home-gitops/items/Emby API Key"
+    env:
+      - envVar: HOMEPAGE_VAR_EMBY_API_KEY
+        secretKey: credential
 
   - name: paperless-ngx-creds
     enabled: true
@@ -166,6 +172,10 @@ config:
             icon: emby.png
             href: https://emby.example.net
             description: Media server
+            widget:
+              type: emby
+              url: https://emby.example.net
+              key: "{{HOMEPAGE_VAR_EMBY_API_KEY}}"            
 
         - Audiobookshelf:
             icon: audiobookshelf.png
