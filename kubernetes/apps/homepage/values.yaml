@@ -57,7 +57,7 @@ config:
     layout:
       Home:
         style: row
-        columns: 4
+        columns: 2
         tab: Home
         Media:
           style: row
@@ -200,9 +200,9 @@ config:
 
     - Extra:
         - TronByt Server:
-          icon: tronbyt.png
-          href: https://tronbyt.example.net
-          description: Tidbyt-compatible display server
+            icon: tronbyt.png
+            href: https://tronbyt.example.net
+            description: Tidbyt-compatible display server
 
         - Garage S3:
             icon: garage.png
