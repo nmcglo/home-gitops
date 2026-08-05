@@ -55,21 +55,33 @@ config:
     color: slate
     headerStyle: boxed
     layout:
-      Cluster Infrastructure:
-        style: row
-        columns: 4
-      Network:
-        style: row
-        columns: 4
       Home:
         style: row
         columns: 4
+        tab: Home
+      Extra:
+        style: row
+        columns: 4
+        tab: Detailed
+      Cluster Infrastructure:
+        style: row
+        columns: 4
+        tab: Detailed
+      Network:
+        style: row
+        columns: 4
+        tab: Detailed
       Local LLMs:
         style: row
         columns: 4
-    providers:
-      longhorn:
-        url: https://longhorn.example.net
+        tab: Detailed
+      Local LLMs Extra:
+        style: row
+        columns: 4
+        tab: Detailed
+      Developer:
+        tab: Detailed
+    providers: {}
 
   kubernetes: |
     mode: cluster
@@ -141,11 +153,6 @@ config:
             href: https://adguard-sync.example.net
             description: Keeps AdGuard instances in sync
 
-        - Garage S3:
-            icon: garage.png
-            href: https://garage.example.net
-            description: S3-compatible object storage
-
     - Home:
         - Home Assistant:
             icon: home-assistant.png
@@ -156,11 +163,6 @@ config:
             icon: emby.png
             href: https://emby.example.net
             description: Media server
-
-        - Kiwix:
-            icon: kiwix.png
-            href: https://kiwix.example.net
-            description: Offline content archive
 
         - Mealie:
             icon: mealie.png
@@ -176,15 +178,31 @@ config:
               url: https://paperless.example.net
               key: "{{HOMEPAGE_VAR_PAPERLESS_API_TOKEN}}"
 
-        - TronByt Server:
-            icon: tronbyt.png
-            href: https://tronbyt.example.net
-            description: Tidbyt-compatible display server
-
         - Audiobookshelf:
             icon: audiobookshelf.png
             href: https://books.example.net
             description: Audiobook & podcast server
+
+        - Kiwix:
+            icon: kiwix.png
+            href: https://kiwix.example.net
+            description: Offline content archive
+
+        - Gatus:
+            icon: gatus.png
+            href: https://gatus.example.net
+            description: Example.net Services Status Page
+
+    - Extra:
+        - TronByt Server:
+          icon: tronbyt.png
+          href: https://tronbyt.example.net
+          description: Tidbyt-compatible display server
+
+        - Garage S3:
+            icon: garage.png
+            href: https://garage.example.net
+            description: S3-compatible object storage
 
     - Local LLMs:
         - Open WebUI:
@@ -192,6 +210,7 @@ config:
             href: https://chat.example.net
             description: LLM chat interface
 
+    - Local LLMs Extra:
         - RK3588 llama.cpp:
             icon: llama.png
             href: https://rkllama.example.net
@@ -210,12 +229,6 @@ config:
           cpu: true
           memory: true
           showLabel: true
-    - resources:
-        backend: resources
-        expanded: true
-        cpu: true
-        memory: true
-        network: default
     - search:
         provider: brave
         target: _blank
