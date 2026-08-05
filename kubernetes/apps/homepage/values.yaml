@@ -59,9 +59,9 @@ config:
         style: row
         columns: 2
         tab: Home
-        Media:
-          style: row
-          columns: 2
+      Media:
+        style: row
+        columns: 2
       Development:
         style: row
         columns: 2
