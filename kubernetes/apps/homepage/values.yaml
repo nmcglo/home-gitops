@@ -101,7 +101,8 @@ config:
         tab: Extra
       Developer:
         tab: Extra
-    providers: {}
+    providers:
+      longhorn: https://longhorn.example.net
 
   kubernetes: |
     mode: cluster
