@@ -177,6 +177,9 @@ config:
               url: https://emby.example.net
               key: "{{HOMEPAGE_VAR_EMBY_API_KEY}}"
               enableBlocks: true
+              enableNowPlaying: false
+              enableMediaControl: false
+              expandOneStreamToTwoRows: false
 
         - Audiobookshelf:
             icon: audiobookshelf.png
