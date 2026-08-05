@@ -59,68 +59,77 @@ config:
         style: row
         columns: 4
         tab: Home
+        Media:
+          style: row
+          columns: 2
       Extra:
         style: row
-        columns: 4
-        tab: Detailed
+        columns: 2
+        tab: Extra
       Cluster Infrastructure:
         style: row
-        columns: 4
-        tab: Detailed
+        columns: 2
+        tab: Extra
       Network:
         style: row
-        columns: 4
-        tab: Detailed
+        columns: 2
+        tab: Extra
       Local LLMs:
         style: row
-        columns: 4
-        tab: Detailed
+        columns: 2
+        tab: Extra
       Local LLMs Extra:
         style: row
-        columns: 4
-        tab: Detailed
+        columns: 2
+        tab: Extra
       Developer:
-        tab: Detailed
+        tab: Extra
     providers: {}
 
   kubernetes: |
     mode: cluster
 
   bookmarks: |
-    - Developer:
-        - Forgejo:
-            - abbr: FJ
-              href: https://forgejo.example.net
-        - ArgoCD:
-            - abbr: CD
-              href: https://argocd.example.net
+    - General:
+        - Reddit:
+            - abbr: RD
+              href: https://reddit.com
+        - GMail:
+            - abbr: GM
+              href: https://gmail.com
 
   services: |
     - Cluster Infrastructure:
-        - ArgoCD:
-            icon: argocd.png
-            href: https://argocd.example.net
-            description: GitOps continuous delivery
-
         - Longhorn:
             icon: longhorn.png
             href: https://longhorn.example.net
             description: Distributed block storage
 
-        - Traefik:
-            icon: traefik.png
-            href: https://traefik.cluster.example.net
-            description: Ingress controller
+        # - Traefik:
+        #     icon: traefik.png
+        #     href: https://traefik.cluster.example.net
+        #     description: Ingress controller
 
         - 1Password Connect:
             icon: 1password.png
             href: https://onepassword.cluster.example.net
             description: Secrets operator
 
+        - NGINX Proxy Manager:
+            icon: nginx-proxy-manager.png
+            href: https://proxy.example.net
+            description: Reverse proxy / TLS termination
+
+    - Development:
         - Forgejo:
             icon: forgejo.png
             href: https://forgejo.example.net
             description: Git hosting
+
+        - ArgoCD:
+            icon: argocd.png
+            href: https://argocd.example.net
+            description: GitOps continuous delivery
 
         - Docker Registry:
             icon: docker.png
@@ -131,11 +140,6 @@ config:
             icon: jenkins.png
             href: https://jenkins.example.net
             description: CI/CD automation
-
-        - NGINX Proxy Manager:
-            icon: nginx-proxy-manager.png
-            href: https://proxy.example.net
-            description: Reverse proxy / TLS termination
 
     - Network:
         - AdGuard Home (HAOS):
@@ -153,16 +157,27 @@ config:
             href: https://adguard-sync.example.net
             description: Keeps AdGuard instances in sync
 
+    - Media:
+        - Emby:
+            icon: emby.png
+            href: https://emby.example.net
+            description: Media server
+
+        - Audiobookshelf:
+            icon: audiobookshelf.png
+            href: https://books.example.net
+            description: Audiobook & podcast server
+
+        - Kiwix:
+            icon: kiwix.png
+            href: https://kiwix.example.net
+            description: Offline content archive
+
     - Home:
         - Home Assistant:
             icon: home-assistant.png
             href: https://ha.example.net
             description: Home automation
-
-        - Emby:
-            icon: emby.png
-            href: https://emby.example.net
-            description: Media server
 
         - Mealie:
             icon: mealie.png
@@ -177,16 +192,6 @@ config:
               type: paperlessngx
               url: https://paperless.example.net
               key: "{{HOMEPAGE_VAR_PAPERLESS_API_TOKEN}}"
-
-        - Audiobookshelf:
-            icon: audiobookshelf.png
-            href: https://books.example.net
-            description: Audiobook & podcast server
-
-        - Kiwix:
-            icon: kiwix.png
-            href: https://kiwix.example.net
-            description: Offline content archive
 
         - Gatus:
             icon: gatus.png
