@@ -266,6 +266,21 @@ config:
           cpu: true
           memory: true
           showLabel: true
+    - longhorn:
+        # Show the expanded view
+        expanded: true
+        # Shows a node representing the aggregate values
+        total: true
+        # Shows the node names as labels
+        labels: true
+        # Show the nodes
+        nodes: true
+        # An explicit list of nodes to show. All are shown by default if "nodes" is true
+        include:
+          - turing-node1
+          - turing-node2
+          - turing-node3
+          - turing-node4
     - search:
         provider: brave
         target: _blank
