@@ -62,6 +62,10 @@ config:
         Media:
           style: row
           columns: 2
+      Development:
+        style: row
+        columns: 2
+        tab: Extra
       Extra:
         style: row
         columns: 2
