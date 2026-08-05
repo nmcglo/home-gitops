@@ -220,6 +220,8 @@ config:
         provider: brave
         target: _blank
 
+  proxmox: ""
+
   docker: ""
 
   customCss: ""
