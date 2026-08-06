@@ -19,6 +19,48 @@ spec:
         # value on subsequent syncs unless you also bump `existingSecretAdminPassword`.
         harborAdminPassword: "Harbor12345"
 
+        # -- Multi-arch (arm64) images.
+        # Merged to `main` in goharbor/harbor#22311 (2026-05-12) but not yet in a
+        # tagged release — every `vX.Y.Z` tag through at least v2.15.3 is amd64-only.
+        # The `dev` tag tracks `main` and IS published as a real multi-arch manifest
+        # list (amd64+arm64) today. It's a moving nightly build, not a pinned release —
+        # switch every `tag: dev` below back to a versioned tag once Harbor v2.16.0
+        # ships with official multi-arch release images.
+        nginx:
+          image:
+            tag: dev
+        portal:
+          image:
+            tag: dev
+        core:
+          image:
+            tag: dev
+        jobservice:
+          image:
+            tag: dev
+        registry:
+          registry:
+            image:
+              tag: dev
+          controller:
+            image:
+              tag: dev
+        trivy:
+          enabled: true
+          image:
+            tag: dev
+        database:
+          internal:
+            image:
+              tag: dev
+        redis:
+          internal:
+            image:
+              tag: dev
+        exporter:
+          image:
+            tag: dev
+
         expose:
           type: loadBalancer
           tls:
@@ -55,9 +97,6 @@ spec:
               storageClass: "longhorn"
               accessMode: ReadWriteMany
               size: 5Gi
-
-        trivy:
-          enabled: true
 
         metrics:
           enabled: false
