@@ -1,0 +1,73 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: harbor
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://helm.goharbor.io
+    chart: harbor
+    targetRevision: 1.19.2
+    helm:
+      values: |
+        # -- Public URL Harbor is reachable at (protocol + host, no trailing slash).
+        # Update this to match whatever hostname/IP you point at expose.loadBalancer.IP below.
+        externalURL: https://harbor.example.net
+
+        # -- Change this before deploying. After first sync, Harbor ignores this
+        # value on subsequent syncs unless you also bump `existingSecretAdminPassword`.
+        harborAdminPassword: "Harbor12345"
+
+        expose:
+          type: loadBalancer
+          tls:
+            enabled: false
+          loadBalancer:
+            name: harbor
+            IP: "192.168.100.30"   # Set to a static MetalLB IP, e.g. "192.168.100.XX"
+            ports:
+              httpPort: 80
+              httpsPort: 443
+
+        persistence:
+          enabled: true
+          resourcePolicy: "keep"
+          persistentVolumeClaim:
+            registry:
+              storageClass: "longhorn"
+              accessMode: ReadWriteMany
+              size: 50Gi
+            jobservice:
+              jobLog:
+                storageClass: "longhorn"
+                accessMode: ReadWriteMany
+                size: 1Gi
+            database:
+              storageClass: "longhorn"
+              accessMode: ReadWriteMany
+              size: 5Gi
+            redis:
+              storageClass: "longhorn"
+              accessMode: ReadWriteMany
+              size: 1Gi
+            trivy:
+              storageClass: "longhorn"
+              accessMode: ReadWriteMany
+              size: 5Gi
+
+        trivy:
+          enabled: true
+
+        metrics:
+          enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: harbor
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
