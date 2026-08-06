@@ -63,7 +63,7 @@ onepasswordSecrets:
 config:
   settings: |
     title: Example.net
-    favicon: https://gethomepage.dev/icons/favicon.ico
+    favicon: https://gethomepage.dev/assets/favicon.ico
     theme: dark
     color: slate
     headerStyle: boxed
@@ -75,6 +75,7 @@ config:
       Media:
         style: row
         columns: 2
+        tab: Home
       Development:
         style: row
         columns: 2
