@@ -46,10 +46,19 @@ settings: |
   engines:
     - name: brave
       engine: brave
-      inactive: false
+      inactive: true
+      disabled: true
       api_key: "${BRAVE_API_KEY}"   # substituted at pod start; see onepasswordSecrets above
+    - name: braveapi
+      engine: braveapi
+      api_key: "${BRAVE_API_KEY}"  # required
+    - name: duckduckgo
+      engine: duckduckgo
+      inactive: true
+      disabled: true
     - name: wikidata
       engine: wikidata
+      inactive: true
       disabled: true
 
 
