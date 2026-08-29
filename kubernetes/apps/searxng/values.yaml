@@ -18,7 +18,7 @@ image:
   pullPolicy: IfNotPresent
 
 env:
-  SEARXNG_BASE_URL: "https://searxng.example.net/"
+  SEARXNG_BASE_URL: "https://search.example.net/"
   UWSGI_WORKERS: "4"
   UWSGI_THREADS: "4"
   SEARXNG_REDIS_URL: "redis://searxng-redis:6379/0"
