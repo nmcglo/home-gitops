@@ -122,4 +122,4 @@ env:
 playwright:
   env:
     BLOCK_MEDIA: ""
-    ALLOW_LOCAL_WEBHOOKS: ""
+    ALLOW_LOCAL_WEBHOOKS: true
