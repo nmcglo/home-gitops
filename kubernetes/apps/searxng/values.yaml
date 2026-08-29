@@ -48,6 +48,9 @@ settings: |
       engine: brave
       inactive: false
       api_key: "${BRAVE_API_KEY}"   # substituted at pod start; see onepasswordSecrets above
+    - name: wikidata
+      engine: wikidata
+      disable: true
 
 
 service:
