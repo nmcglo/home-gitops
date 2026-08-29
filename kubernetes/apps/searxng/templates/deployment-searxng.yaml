@@ -13,6 +13,43 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
+      # Renders settings.yml from the chart-managed template (values.yaml
+      # `settings`), substituting only the ${VAR} placeholders this container
+      # actually has values for (via onepasswordSecrets below). Any other
+      # ${...} token in the template is left as literal text untouched.
+      initContainers:
+        - name: settings-render
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["python3", "-c"]
+          args:
+            - |
+              import os
+              with open("/template/settings.yml") as f:
+                  content = f.read()
+              content = os.path.expandvars(content)
+              with open("/rendered/settings.yml", "w") as f:
+                  f.write(content)
+              print("searxng: rendered settings.yml from template")
+          env:
+            {{- range .Values.onepasswordSecrets }}
+            {{- if .enabled }}
+            {{- $secretName := .name }}
+            {{- range .env }}
+            - name: {{ .envVar }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: {{ .secretKey }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+          volumeMounts:
+            - name: settings-template
+              mountPath: /template
+              readOnly: true
+            - name: settings-rendered
+              mountPath: /rendered
       containers:
         - name: searxng
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -41,9 +78,11 @@ spec:
               {{- end }}
             {{- end }}
           volumeMounts:
-            - name: data
+            - name: settings-rendered
               mountPath: /etc/searxng
       volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-pvc
+        - name: settings-template
+          configMap:
+            name: {{ .Release.Name }}-settings-template
+        - name: settings-rendered
+          emptyDir: {}

@@ -2,7 +2,7 @@
 
 namespace: searxng
 
-onepasswordSecrets: []
+onepasswordSecrets:
 # Example (only needed if you want a fixed instance secret key across replicas):
 # - name: searxng-secret
 #   enabled: true
@@ -11,6 +11,20 @@ onepasswordSecrets: []
 #   env:
 #     - envVar: SEARXNG_SECRET
 #       secretKey: secret-key
+#
+# Engine API keys: add an entry per key, then reference the same envVar name
+# as a "${VAR}" placeholder anywhere in `settings` below (e.g. under an
+# engine's `api_key:` field). The settings-render initContainer substitutes
+# only the placeholders it has a matching env var for — anything else in the
+# template is left as literal text, and the key itself is never written to
+# the ConfigMap or committed to git.
+- name: searxng-engine-keys
+  enabled: true
+  autoRestart: true
+  itemPath: "vaults/home-gitops/Searxng Secrets"
+  env:
+    - envVar: BRAVE_API_KEY
+      secretKey: brave-api-key
 
 image:
   repository: docker.io/searxng/searxng
@@ -21,7 +35,33 @@ env:
   SEARXNG_BASE_URL: "https://search.example.net/"
   UWSGI_WORKERS: "4"
   UWSGI_THREADS: "4"
-  SEARXNG_REDIS_URL: "redis://searxng-redis:6379/0"
+  SEARXNG_VALKEY_URL: "redis://searxng-redis:6379/0"
+
+
+settings: |
+  use_default_settings: true
+
+  search:
+    safe_search: 0 # Filter results. 0: None, 1: Moderate, 2: Strict
+    autocomplete: "brave"
+
+  server:
+    limiter: false     # rate limit the number of request on the instance, block some bots Is overwritten by ${SEARXNG_LIMITER}
+    image_proxy: false # Proxy image results through SearXNG. Is overwritten by ${SEARXNG_IMAGE_PROXY}
+
+  plugins:
+    searx.plugins.infinite_scroll.SXNGPlugin:
+      active: true
+
+    searx.plugins.oa_doi_rewrite.SXNGPlugin:
+      active: true
+
+  engines:
+    - name: brave
+      engine: brave
+      inactive: false
+      api_key: "${BRAVE_API_KEY}"   # substituted at pod start; see onepasswordSecrets above
+
 
 service:
   type: LoadBalancer
@@ -29,11 +69,10 @@ service:
   targetPort: 8080
   loadBalancerIP: ""   # Set to a static IP for MetalLB, e.g. "192.168.100.X"
 
+# settings.yml is now fully chart+env rendered on every pod start (see
+# templates/configmap-settings.yaml + the settings-render initContainer),
+# so there's no PVC for /etc/searxng anymore — only redis needs storage.
 persistence:
-  searxng:
-    storageClassName: longhorn
-    accessMode: ReadWriteOnce
-    size: 10Gi
   redis:
     storageClassName: longhorn
     accessMode: ReadWriteOnce
