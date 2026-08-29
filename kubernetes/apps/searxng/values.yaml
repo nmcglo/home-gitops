@@ -61,12 +61,13 @@ settings: |
     - name: ahmia
       engine: ahmia
       inactive: true
-    - name: torch
-      engine: torch
-      inactivce: true
     - name: startpage
       engine: startpage
       disabled: true
+    - name: forgejo.example.net
+      engine: gitea
+      base_url: https://forgejo.example.net
+      shortcut: forgejo
 
 
 service:
