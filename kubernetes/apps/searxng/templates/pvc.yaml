@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  storageClassName: {{ .Values.persistence.searxng.storageClassName }}
+  accessModes:
+    - {{ .Values.persistence.searxng.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.searxng.size }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-redisdata-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  storageClassName: {{ .Values.persistence.redis.storageClassName }}
+  accessModes:
+    - {{ .Values.persistence.redis.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.redis.size }}
