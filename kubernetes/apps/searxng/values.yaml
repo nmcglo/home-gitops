@@ -54,11 +54,18 @@ settings: |
       api_key: "${BRAVE_API_KEY}"  # required
     - name: duckduckgo
       engine: duckduckgo
-      inactive: true
       disabled: true
     - name: wikidata
       engine: wikidata
       inactive: true
+    - name: ahmia
+      engine: ahmia
+      inactive: true
+    - name: torch
+      engine: torch
+      inactivce: true
+    - name: startpage
+      engine: startpage
       disabled: true
 
 
