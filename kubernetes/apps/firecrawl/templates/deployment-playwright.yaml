@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-playwright
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-playwright
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-playwright
+    spec:
+      containers:
+        - name: playwright
+          image: "{{ .Values.image.playwright.repository }}:{{ .Values.image.playwright.tag }}"
+          imagePullPolicy: {{ .Values.image.playwright.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          env:
+            - name: PORT
+              value: "3000"
+            - name: MAX_CONCURRENT_PAGES
+              value: {{ .Values.env.CRAWL_CONCURRENT_REQUESTS | quote }}
+            {{- range $key, $value := .Values.playwright.env }}
+            {{- if $value }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- end }}
+            - name: PROXY_SERVER
+              value: {{ .Values.env.PROXY_SERVER | quote }}
+            - name: PROXY_USERNAME
+              value: {{ .Values.env.PROXY_USERNAME | quote }}
+            - name: PROXY_PASSWORD
+              value: {{ .Values.env.PROXY_PASSWORD | quote }}
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: playwright-cache
+              mountPath: /tmp/.cache
+      volumes:
+        - name: playwright-cache
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi

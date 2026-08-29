@@ -1,0 +1,125 @@
+# Default values for firecrawl
+#
+# Firecrawl self-hosts as 5 services (see upstream docker-compose.yaml):
+#   api             - HTTP API; also runs the in-process queue workers (harness --start-docker)
+#   playwright      - headless Chromium used by the API to render JS-heavy pages
+#   redis           - cache + rate limiting (ephemeral, no persistence needed)
+#   rabbitmq        - job queue transport between api and its workers
+#   postgres        - "nuq" queue/job backend (needs persistence, see below)
+#
+# Only the api service is exposed outside the cluster (LoadBalancer). Everything
+# else is ClusterIP-only, matching the upstream compose file's intent that
+# "PostgreSQL, Redis, RabbitMQ, and worker ports should remain private by default."
+
+namespace: firecrawl
+
+# 1Password secrets — none required for a basic deployment. Add entries here
+# (see the searxng or other charts in this repo) if you'd rather pull
+# OPENAI_API_KEY / BULL_AUTH_KEY / proxy creds from 1Password instead of the
+# plain `env` block below.
+onepasswordSecrets:
+  - name: firecrawl-secrets
+    enabled: true
+    itemPath: "vaults/home-gitops/items/Firecrawl Secrets"
+    env:
+      - envVar: BULL_AUTH_KEY
+        secretKey: bull_auth_key
+
+image:
+  api:
+    repository: ghcr.io/firecrawl/firecrawl
+    tag: latest
+    pullPolicy: IfNotPresent
+  playwright:
+    repository: ghcr.io/firecrawl/playwright-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  postgres:
+    repository: ghcr.io/firecrawl/nuq-postgres
+    tag: latest
+    pullPolicy: IfNotPresent
+  redis:
+    repository: redis
+    tag: alpine
+    pullPolicy: IfNotPresent
+  rabbitmq:
+    repository: rabbitmq
+    tag: 3-management
+    pullPolicy: IfNotPresent
+
+# Public-facing API service
+service:
+  type: LoadBalancer
+  port: 3002
+  targetPort: 3002
+  loadBalancerIP: ""   # Set to a static IP for MetalLB, e.g. "192.168.100.X"
+
+# Postgres is the only component that needs durable storage — it backs the
+# "nuq" job/queue table. Redis is pure cache/rate-limit (fine to lose),
+# RabbitMQ just transports in-flight jobs (fine to lose on restart for a
+# home setup).
+persistence:
+  postgres:
+    storageClassName: longhorn
+    accessMode: ReadWriteOnce
+    size: 5Gi
+
+postgres:
+  user: postgres
+  password: changeme
+  db: postgres
+
+# Env vars shared by the api container. Anything left blank disables that
+# optional feature (matches upstream apps/api/.env.example behavior).
+env:
+  # --- Concurrency / performance tuning ---
+  NUM_WORKERS_PER_QUEUE: "8"
+  CRAWL_CONCURRENT_REQUESTS: "10"
+  MAX_CONCURRENT_JOBS: "5"
+  BROWSER_POOL_SIZE: "5"
+
+  # --- Auth ---
+  # false = no Supabase-backed API key auth (any API key is accepted). Set to
+  # "true" and configure SUPABASE_* below if you want real key management.
+  USE_DB_AUTHENTICATION: "false"
+
+  # Secures the internal Bull queue admin endpoint. CHANGE THIS before
+  # deploying — this is a placeholder, not a real secret.
+  # BULL_AUTH_KEY: "CHANGE_ME_TO_A_RANDOM_SECRET"
+
+  LOGGING_LEVEL: "INFO"
+
+  # --- Optional: LLM-dependent features (structured `extract`, image alt-text
+  # generation, etc.). Leave blank to disable. ---
+  OPENAI_API_KEY: ""
+  OPENAI_BASE_URL: ""
+  MODEL_NAME: ""
+  MODEL_EMBEDDING_NAME: ""
+  OLLAMA_BASE_URL: ""
+
+  # --- Optional: Supabase (only used if USE_DB_AUTHENTICATION=true) ---
+  SUPABASE_URL: ""
+  SUPABASE_ANON_TOKEN: ""
+  SUPABASE_SERVICE_TOKEN: ""
+
+  # --- Optional: outbound proxy for Playwright + API fetches ---
+  PROXY_SERVER: ""
+  PROXY_USERNAME: ""
+  PROXY_PASSWORD: ""
+
+  # --- Optional: self-hosted SearXNG for the /search endpoint. ---
+  SEARXNG_ENDPOINT: "https://search.example.net"
+  SEARXNG_ENGINES: ""
+  SEARXNG_CATEGORIES: ""
+
+  # --- Optional: webhooks ---
+  SELF_HOSTED_WEBHOOK_URL: ""
+  SELF_HOSTED_WEBHOOK_HMAC_SECRET: ""
+
+  # --- Optional: Slack health notifications ---
+  SLACK_WEBHOOK_URL: ""
+
+playwright:
+  env:
+    BLOCK_MEDIA: ""
+    ALLOW_LOCAL_WEBHOOKS: ""
