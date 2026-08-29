@@ -21,7 +21,7 @@ onepasswordSecrets:
 - name: searxng-engine-keys
   enabled: true
   autoRestart: true
-  itemPath: "vaults/home-gitops/Searxng Secrets"
+  itemPath: "vaults/home-gitops/items/Searxng Secrets"
   env:
     - envVar: BRAVE_API_KEY
       secretKey: brave-api-key
