@@ -3,28 +3,15 @@
 namespace: searxng
 
 onepasswordSecrets:
-# Example (only needed if you want a fixed instance secret key across replicas):
-# - name: searxng-secret
-#   enabled: true
-#   autoRestart: true
-#   itemPath: "vaults/home-gitops/items/searxng_secret"
-#   env:
-#     - envVar: SEARXNG_SECRET
-#       secretKey: secret-key
-#
-# Engine API keys: add an entry per key, then reference the same envVar name
-# as a "${VAR}" placeholder anywhere in `settings` below (e.g. under an
-# engine's `api_key:` field). The settings-render initContainer substitutes
-# only the placeholders it has a matching env var for — anything else in the
-# template is left as literal text, and the key itself is never written to
-# the ConfigMap or committed to git.
-- name: searxng-engine-keys
+- name: searxng-secrets
   enabled: true
   autoRestart: true
   itemPath: "vaults/home-gitops/items/Searxng Secrets"
   env:
     - envVar: BRAVE_API_KEY
       secretKey: brave-api-key
+    - envVar: SEARXNG_SECRET
+      secretKey: searxng-secret
 
 image:
   repository: docker.io/searxng/searxng
