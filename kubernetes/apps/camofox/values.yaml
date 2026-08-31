@@ -31,7 +31,7 @@ image:
 
 # Extra plain env vars (secrets come from onepasswordSecrets above)
 env:
-  ENABLE_VNC: "1"
+  ENABLE_VNC: 1
 
 service:
   type: LoadBalancer
