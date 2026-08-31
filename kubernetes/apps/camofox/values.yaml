@@ -1,0 +1,51 @@
+# Default values for camofox
+#
+# https://github.com/jo-inc/camofox-browser — "stealth headless browser for AI
+# agents" built on Camoufox (a Firefox fork with anti-bot-detection patches).
+# Exposes a REST API (default port 9377) plus an optional noVNC UI (port 6080)
+# for visually logging into sites and exporting the resulting session state.
+
+namespace: camofox
+
+# CAMOFOX_API_KEY   - enables the cookie-import endpoint (POST /sessions/:id/cookies)
+# CAMOFOX_ACCESS_KEY - bearer-auth required on all routes except /health; set this
+#                      since the service is reachable beyond loopback via LoadBalancer
+# VNC_PASSWORD      - password for the noVNC interactive session
+onepasswordSecrets:
+  - name: camofox-secrets
+    enabled: true
+    autoRestart: true
+    itemPath: "vaults/home-gitops/items/Camofox Secrets"
+    env:
+      - envVar: CAMOFOX_API_KEY
+        secretKey: api_key
+      - envVar: CAMOFOX_ACCESS_KEY
+        secretKey: access_key
+      - envVar: VNC_PASSWORD
+        secretKey: vnc_password
+
+image:
+  repository: ghcr.io/jo-inc/camofox-browser
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Extra plain env vars (secrets come from onepasswordSecrets above)
+env:
+  ENABLE_VNC: "1"
+
+service:
+  type: LoadBalancer
+  port: 9377
+  targetPort: 9377
+  vncPort: 6080
+  vncTargetPort: 6080
+  loadBalancerIP: ""   # Set to a static IP for MetalLB, e.g. "192.168.100.31"
+
+# Persists ~/.camofox/{cookies,profiles,traces,uploads} so authenticated
+# sessions/cookies/traces survive pod restarts. Off by default — enable if
+# you want VNC logins and imported cookies to stick around.
+persistence:
+  enabled: false
+  storageClassName: longhorn
+  accessMode: ReadWriteMany
+  size: 5Gi

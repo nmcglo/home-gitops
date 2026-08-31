@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: camofox
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+            - name: vnc
+              containerPort: {{ .Values.service.vncTargetPort }}
+          env:
+            {{- range .Values.onepasswordSecrets }}
+            {{- if .enabled }}
+            {{- $secretName := .name }}
+            {{- range .env }}
+            - name: {{ .envVar }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secretName }}
+                  key: {{ .secretKey }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              {{- if kindIs "string" $value }}
+              value: {{ $value | quote }}
+              {{- else }}
+              {{- toYaml $value | nindent 14 }}
+              {{- end }}
+            {{- end }}
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: data
+              mountPath: /home/node/.camofox/cookies
+              subPath: cookies
+            - name: data
+              mountPath: /home/node/.camofox/profiles
+              subPath: profiles
+            - name: data
+              mountPath: /home/node/.camofox/traces
+              subPath: traces
+            - name: data
+              mountPath: /home/node/.camofox/uploads
+              subPath: uploads
+          {{- end }}
+      {{- if .Values.persistence.enabled }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-pvc
+      {{- end }}
