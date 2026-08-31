@@ -31,9 +31,9 @@ image:
 
 # Extra plain env vars (secrets come from onepasswordSecrets above)
 env:
-  ENABLE_VNC: 1
-  PORT: 9377
-  CAMOFOX_PORT: 9377
+  ENABLE_VNC: "1"
+  PORT: "9377"
+  CAMOFOX_PORT: "9377"
 
 service:
   type: LoadBalancer
