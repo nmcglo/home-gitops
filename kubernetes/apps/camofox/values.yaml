@@ -34,6 +34,7 @@ env:
   ENABLE_VNC: "1"
   PORT: "9377"
   CAMOFOX_PORT: "9377"
+  CAMOFOX_BIND_HOST: "0.0.0.0"
 
 service:
   type: LoadBalancer
