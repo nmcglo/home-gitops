@@ -9,8 +9,8 @@ services:
       - /volume1/mealie:/app/data
     environment:
       ALLOW_SIGNUP: "false"
-      PUID: "1000"
-      PGID: "1000"
+      PUID: "1027"
+      PGID: "100"
       TZ: "America/New_York"
       MAX_WORKERS: "1"
       WEB_CONCURRENCY: "1"
