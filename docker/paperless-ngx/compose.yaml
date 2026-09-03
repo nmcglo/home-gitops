@@ -1,0 +1,64 @@
+# Paperless-ngx — Postgres + Redis + Tika/Gotenberg (Office doc support)
+
+services:
+  broker:
+    image: docker.io/library/redis:8
+    restart: unless-stopped
+    volumes:
+      - /volume1/paperless-ngx/other_data/redisdata:/data
+
+  db:
+    image: docker.io/library/postgres:18
+    restart: unless-stopped
+    volumes:
+      - /volume1/paperless-ngx/other_data/pgdata:/var/lib/postgresql
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      # If you change this, also set PAPERLESS_DBPASS in .env to match.
+      POSTGRES_PASSWORD: paperless
+
+  gotenberg:
+    image: docker.io/gotenberg/gotenberg:8.33
+    restart: unless-stopped
+    # Uncomment if RAM is tight — this is only used for Office-doc conversion.
+    # mem_limit: 512m
+    command:
+      - "gotenberg"
+      - "--chromium-disable-javascript=true"
+      - "--chromium-allow-list=file:///tmp/.*"
+
+  tika:
+    image: docker.io/apache/tika:latest
+    restart: unless-stopped
+    # mem_limit: 512m
+
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+      - broker
+      - gotenberg
+      - tika
+    ports:
+      # DSM itself owns 80/443/5000/5001, and other packages often grab
+      # 8000-8099 — Container Manager will flag it if 8010 collides for you.
+      - "8010:8000"
+    volumes:
+      - /volume1/paperless-ngx/paperless_data/data:/usr/src/paperless/data
+      - /volume1/paperless-ngx/paperless_data/media:/usr/src/paperless/media
+      - /volume1/paperless-ngx/paperless_data/export:/usr/src/paperless/export
+      - /volume1/paperless-ngx/paperless_data/consume:/usr/src/paperless/consume
+      - /volume1/paperless-ngx/paperless_data/trash:/usr/src/paperless/trash
+    environment:
+      USERMAP_UID: ${USERMAP_UID}
+      USERMAP_GID: ${USERMAP_GID}
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
+      PAPERLESS_URL: "https://paperless.example.net"
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_DBENGINE: postgresql
+      PAPERLESS_TIKA_ENABLED: 1
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
+      PAPERLESS_TIKA_ENDPOINT: http://tika:9998
