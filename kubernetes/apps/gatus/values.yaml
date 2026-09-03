@@ -257,9 +257,9 @@ config: |
       alerts:
         - type: webhook
 
-    - name: CNCF Distribution Registry
+    - name: Harbor Container Registry
       group: Example.Net Infrastructure
-      url: https://registry.example.net/v2/
+      url: https://harbor.example.net/api/v2.0/health
       method: GET
       client:
         timeout: 10s
