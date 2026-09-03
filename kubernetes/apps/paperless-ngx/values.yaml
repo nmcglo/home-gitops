@@ -19,7 +19,7 @@ onepasswordSecrets:
 paperless:
   image:
     repository: ghcr.io/paperless-ngx/paperless-ngx
-    tag: 2.20.15
+    tag: "3.1.2"
     pullPolicy: IfNotPresent
   env:
     PAPERLESS_URL: "https://paperless.example.net"
@@ -29,6 +29,7 @@ paperless:
     PAPERLESS_CONSUMER_RECURSIVE: "true"
     PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
     PAPERLESS_DATE_ORDER: "MDY"
+    PAPERLESS_DBENGINE: "postgresql"
     PAPERLESS_ADMIN_PASSWORD:
       valueFrom:
         secretKeyRef:
