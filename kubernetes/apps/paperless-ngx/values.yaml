@@ -19,7 +19,7 @@ onepasswordSecrets:
 paperless:
   image:
     repository: ghcr.io/paperless-ngx/paperless-ngx
-    tag: latest
+    tag: 2.20.15
     pullPolicy: IfNotPresent
   env:
     PAPERLESS_URL: "https://paperless.example.net"
