@@ -10,6 +10,7 @@ commandOverride:
   - "8080"
   - "--host"
   - "0.0.0.0"
+  - "--direct-io"
 
 image:
   repository: nmcglo/rk-llama.cpp
