@@ -1,0 +1,108 @@
+# Default values for homelable
+# https://github.com/Pouzor/homelable
+
+namespace: homelable
+
+onepasswordSecrets:
+  - name: homelable-secret-key
+    enabled: true
+    autoRestart: true
+    itemPath: "vaults/home-gitops/items/homelable_secret_key"
+  - name: homelable-auth
+    enabled: true
+    autoRestart: true
+    itemPath: "vaults/home-gitops/items/homelable_auth"
+  - name: homelable-mcp-keys
+    enabled: true
+    autoRestart: true
+    itemPath: "vaults/home-gitops/items/homelable_mcp_keys"
+
+backend:
+  image:
+    repository: ghcr.io/pouzor/homelable-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  # nmap needs raw sockets for SYN scan / OS detection (matches docker-compose's cap_add: NET_RAW).
+  # Even with this, the scanner sits behind a ClusterIP/pod network — it can see hosts on
+  # SCANNER_RANGES but will never report MAC addresses the way a host-network backend would.
+  capabilities:
+    - NET_RAW
+  mountPath: /app/data
+  service:
+    port: 8000
+    targetPort: 8000
+  env:
+    SQLITE_PATH: "/app/data/homelab.db"
+    # URL(s) used to access the frontend in the browser. Add your LAN/reverse-proxy hostname here.
+    CORS_ORIGINS: '["http://localhost:3000", "*.example.net"]'
+    AUTH_MODE: "local"
+    AUTH_USERNAME: "admin"
+    # CIDR ranges the scanner probes with nmap.
+    SCANNER_RANGES: '["192.168.1.0/24","192.168.100.0/24","192.168.201.0/24"]'
+    STATUS_CHECKER_INTERVAL: "60"
+    # Deep scan (optional) — uncomment to probe non-standard ports too.
+    # SCANNER_HTTP_RANGES: '["8080","9000-9100"]'
+    # SCANNER_HTTP_PROBE_ENABLED: "true"
+    # SCANNER_HTTP_VERIFY_TLS: "false"
+    # Live view (optional) — read-only public canvas at /view?key=<value>.
+    # LIVEVIEW_KEY: "changeme"
+    # Gethomepage widget (optional) — read-only stats at /api/v1/stats/summary.
+    # HOMEPAGE_API_KEY: "changeme"
+    SECRET_KEY:
+      valueFrom:
+        secretKeyRef:
+          name: homelable-secret-key
+          key: SECRET_KEY
+    AUTH_PASSWORD_HASH:
+      valueFrom:
+        secretKeyRef:
+          name: homelable-auth
+          key: AUTH_PASSWORD_HASH
+    # Authenticates the mcp service's calls into the backend.
+    MCP_SERVICE_KEY:
+      valueFrom:
+        secretKeyRef:
+          name: homelable-mcp-keys
+          key: MCP_SERVICE_KEY
+
+frontend:
+  image:
+    repository: ghcr.io/pouzor/homelable-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: LoadBalancer
+    port: 80
+    targetPort: 80
+    loadBalancerIP: ""   # Set to a static IP for MetalLB, e.g. "192.168.100.X"
+
+mcp:
+  enabled: true
+  image:
+    repository: ghcr.io/pouzor/homelable-mcp
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: LoadBalancer
+    port: 8001
+    targetPort: 8001
+    loadBalancerIP: ""   # Set to a static IP for MetalLB, e.g. "192.168.100.X". Keep this LAN-only — never expose it to the internet.
+  env:
+    # The backend Service is always named "backend" — see templates/service-backend.yaml.
+    BACKEND_URL: "http://backend:8000"
+    MCP_API_KEY:
+      valueFrom:
+        secretKeyRef:
+          name: homelable-mcp-keys
+          key: MCP_API_KEY
+    MCP_SERVICE_KEY:
+      valueFrom:
+        secretKeyRef:
+          name: homelable-mcp-keys
+          key: MCP_SERVICE_KEY
+
+# Single PVC for the backend's SQLite DB + uploaded floor plans (/app/data).
+persistence:
+  storageClassName: longhorn
+  accessMode: ReadWriteMany
+  size: 5Gi
