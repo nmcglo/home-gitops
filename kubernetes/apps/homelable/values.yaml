@@ -8,6 +8,14 @@ onepasswordSecrets:
     enabled: true
     autoRestart: true
     itemPath: "vaults/home-gitops/items/homelable_secret_key"
+  - name: homelable-liveview-key
+    enabled: true
+    autoRestart: true
+    itemPath: "vaults/home-gitops/items/homelable_liveview_key"
+  - name: homelable-homepage-api-key
+    enabled: true
+    autoRestart: true
+    itemPath: "vaults/home-gitops/items/homelable_homepage_api_key"
   - name: homelable-auth
     enabled: true
     autoRestart: true
@@ -44,10 +52,19 @@ backend:
     # SCANNER_HTTP_RANGES: '["8080","9000-9100"]'
     # SCANNER_HTTP_PROBE_ENABLED: "true"
     # SCANNER_HTTP_VERIFY_TLS: "false"
-    # Live view (optional) — read-only public canvas at /view?key=<value>.
-    # LIVEVIEW_KEY: "changeme"
     # Gethomepage widget (optional) — read-only stats at /api/v1/stats/summary.
     # HOMEPAGE_API_KEY: "changeme"
+    HOMEPAGE_API_KEY:
+      valueFrom:
+        secretKeyRef:
+          name: homelable-homepage-api-key
+          key: HOMEPAGE_API_KEY
+    # Live view (optional) — read-only public canvas at /view?key=<value>.
+    LIVEVIEW_KEY:
+      valueFrom:
+        secretKeyRef:
+          name: homelable-liveview-key
+          key: LIVEVIEW_KEY
     SECRET_KEY:
       valueFrom:
         secretKeyRef:
