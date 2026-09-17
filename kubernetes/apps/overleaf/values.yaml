@@ -1,0 +1,110 @@
+# Default values for Overleaf Community Edition
+# https://github.com/overleaf/overleaf
+
+namespace: overleaf
+
+onepasswordSecrets:
+  # 1Password item must provide both fields below. Generate each with
+  # `openssl rand -base64 32` (OVERLEAF_INVITE_TOKEN_SECRET must be >= 16 chars).
+  - name: overleaf-secrets
+    enabled: true
+    autoRestart: true
+    itemPath: "vaults/home-gitops/items/overleaf_secrets"
+
+overleaf:
+  image:
+    repository: docker.io/sharelatex/sharelatex
+    tag: "6.3.0"
+    pullPolicy: IfNotPresent
+  # Overleaf CE serves its bundled nginx on port 80 inside the container
+  containerPort: 80
+  env:
+    OVERLEAF_APP_NAME: "Overleaf"
+    OVERLEAF_SITE_URL: "https://overleaf.example.net"
+    OVERLEAF_ADMIN_EMAIL: "me@example.com"
+    # Running behind nginx-proxy-manager
+    OVERLEAF_BEHIND_PROXY: "true"
+    # Leave "false" while reaching Overleaf over plain http (e.g. by LoadBalancer
+    # IP). Flip to "true" once access is HTTPS-only, or logins will silently fail.
+    OVERLEAF_SECURE_COOKIE: "true"
+    EMAIL_CONFIRMATION_DISABLED: "true"
+    ENABLED_LINKED_FILE_TYPES: "project_file,project_output_file"
+    ENABLE_CONVERSIONS: "true"
+    # Upstream docker-compose runs compiles in sibling Docker containers, which
+    # requires a Docker socket. That is unavailable in-cluster, so compiles run
+    # in-process instead. Do not enable DOCKER_RUNNER here.
+    SANDBOXED_COMPILES: "false"
+    OVERLEAF_SESSION_SECRET:
+      valueFrom:
+        secretKeyRef:
+          name: overleaf-secrets
+          key: OVERLEAF_SESSION_SECRET
+    # Mandatory as of Overleaf 6.0.0 - the app refuses to start without it
+    OVERLEAF_INVITE_TOKEN_SECRET:
+      valueFrom:
+        secretKeyRef:
+          name: overleaf-secrets
+          key: OVERLEAF_INVITE_TOKEN_SECRET
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "4"
+      memory: 6Gi
+
+mongo:
+  image:
+    # Overleaf 6.x requires MongoDB 8.0
+    repository: docker.io/library/mongo
+    tag: "8.0"
+    pullPolicy: IfNotPresent
+  database: sharelatex
+  # Overleaf uses multi-document transactions, so mongod must run as a replica
+  # set even for a single node.
+  replicaSetName: overleaf
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+
+redis:
+  uid: 999
+  gid: 999
+  image:
+    repository: docker.io/library/redis
+    tag: "7.4"
+    pullPolicy: IfNotPresent
+  # Overleaf 6.x requires Redis >= 7.4. AOF persistence is recommended.
+  appendOnly: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 80
+  loadBalancerIP: ""  # Set to a static IP for MetalLB
+
+persistence:
+  # Overleaf data dir (/var/lib/overleaf): projects, compiles, output, uploads
+  data:
+    storageClassName: longhorn
+    accessMode: ReadWriteOnce
+    size: 30Gi
+  mongodata:
+    storageClassName: longhorn
+    accessMode: ReadWriteOnce
+    size: 10Gi
+  redisdata:
+    storageClassName: longhorn
+    accessMode: ReadWriteOnce
+    size: 2Gi

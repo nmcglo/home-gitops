@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      # Overleaf flushes in-flight document updates to Mongo on shutdown
+      terminationGracePeriodSeconds: 60
+      initContainers:
+        - name: wait-for-mongo
+          image: "{{ .Values.mongo.image.repository }}:{{ .Values.mongo.image.tag }}"
+          command:
+            - sh
+            - -c
+            - |
+              until mongosh "mongodb://{{ .Release.Name }}-mongo:27017/{{ .Values.mongo.database }}" \
+                --quiet --eval 'rs.status().ok' 2>/dev/null | grep -q 1; do
+                echo "waiting for mongo replica set to be ready..."
+                sleep 5
+              done
+              echo "mongo replica set ready"
+      containers:
+        - name: overleaf
+          image: "{{ .Values.overleaf.image.repository }}:{{ .Values.overleaf.image.tag }}"
+          imagePullPolicy: {{ .Values.overleaf.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.overleaf.containerPort }}
+          env:
+            - name: OVERLEAF_MONGO_URL
+              value: "mongodb://{{ .Release.Name }}-mongo/{{ .Values.mongo.database }}"
+            - name: OVERLEAF_REDIS_HOST
+              value: "{{ .Release.Name }}-redis"
+            - name: REDIS_HOST
+              value: "{{ .Release.Name }}-redis"
+            - name: OVERLEAF_REDIS_PORT
+              value: "6379"
+            - name: REDIS_PORT
+              value: "6379"
+            {{- range $key, $value := .Values.overleaf.env }}
+            - name: {{ $key }}
+              {{- if kindIs "string" $value }}
+              value: {{ $value | quote }}
+              {{- else }}
+              {{- toYaml $value | nindent 14 }}
+              {{- end }}
+            {{- end }}
+          # Overleaf runs its own first-boot migrations and can take several
+          # minutes before it serves traffic.
+          startupProbe:
+            httpGet:
+              path: /status
+              port: {{ .Values.overleaf.containerPort }}
+            periodSeconds: 10
+            failureThreshold: 90
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: {{ .Values.overleaf.containerPort }}
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 4
+          resources:
+            {{- toYaml .Values.overleaf.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/overleaf
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-data-pvc

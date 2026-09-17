@@ -1,0 +1,19 @@
+# Initiates the single-node replica set that Overleaf's use of MongoDB
+# transactions requires. Mirrors bin/shared/mongodb-init-replica-set.js from the
+# upstream overleaf/overleaf repo.
+#
+# Scripts in /docker-entrypoint-initdb.d only run when the data directory is
+# empty, i.e. on the very first start against a fresh PVC.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-mongo-init
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Release.Name }}-mongo
+data:
+  mongodb-init-replica-set.js: |
+    rs.initiate({
+      _id: "{{ .Values.mongo.replicaSetName }}",
+      members: [{ _id: 0, host: "{{ .Release.Name }}-mongo:27017" }],
+    });

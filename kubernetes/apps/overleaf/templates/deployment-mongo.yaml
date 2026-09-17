@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-mongo
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  strategy:
+    # Single RWO volume: the old pod must release the PVC before the new one starts
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-mongo
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-mongo
+    spec:
+      # The replica set member is registered under its Service name, so mongod
+      # must resolve that name to itself. Equivalent to the upstream compose
+      # file's `extra_hosts: - mongo:127.0.0.1`.
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+            - "{{ .Release.Name }}-mongo"
+      containers:
+        - name: mongo
+          image: "{{ .Values.mongo.image.repository }}:{{ .Values.mongo.image.tag }}"
+          imagePullPolicy: {{ .Values.mongo.image.pullPolicy }}
+          args:
+            - "--replSet"
+            - "{{ .Values.mongo.replicaSetName }}"
+          ports:
+            - containerPort: 27017
+          env:
+            - name: MONGO_INITDB_DATABASE
+              value: {{ .Values.mongo.database | quote }}
+          readinessProbe:
+            exec:
+              command:
+                - mongosh
+                - --quiet
+                - --eval
+                - "db.adminCommand('ping').ok"
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 6
+          resources:
+            {{- toYaml .Values.mongo.resources | nindent 12 }}
+          volumeMounts:
+            - name: mongodata
+              mountPath: /data/db
+            - name: mongo-init
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+      volumes:
+        - name: mongodata
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-mongodata-pvc
+        - name: mongo-init
+          configMap:
+            name: {{ .Release.Name }}-mongo-init

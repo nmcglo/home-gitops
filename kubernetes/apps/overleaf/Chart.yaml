@@ -1,0 +1,6 @@
+apiVersion: v2
+name: overleaf
+description: Overleaf Community Edition - self-hosted collaborative LaTeX editor
+type: application
+version: 0.1.0
+appVersion: "latest"
