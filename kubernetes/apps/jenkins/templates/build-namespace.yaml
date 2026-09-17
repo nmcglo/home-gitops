@@ -1,0 +1,116 @@
+{{- /*
+Dedicated, locked-down namespace for build agent pods (rbac.agentNamespace).
+Meant for controllers that run untrusted pipelines: builds get their own namespace
+(separate from the controller and its secrets), Pod Security Admission, resource caps,
+and a NetworkPolicy that cuts them off from the LAN and the rest of the cluster.
+*/ -}}
+{{- if .Values.buildIsolation.enabled }}
+{{- $ns := .Values.rbac.agentNamespace }}
+{{- if eq $ns .Values.namespace }}
+{{- fail "buildIsolation.enabled requires rbac.agentNamespace to differ from namespace" }}
+{{- end }}
+{{- with .Values.buildIsolation }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ $ns }}
+  labels:
+    app: {{ $.Release.Name }}
+    pod-security.kubernetes.io/enforce: {{ .podSecurity.enforce }}
+    pod-security.kubernetes.io/warn: {{ .podSecurity.warn }}
+    pod-security.kubernetes.io/audit: {{ .podSecurity.warn }}
+---
+# Build pods fall back to the default ServiceAccount, which has no RoleBindings.
+# Also skip mounting its token so build code doesn't get API credentials by default.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: {{ $ns }}
+  labels:
+    app: {{ $.Release.Name }}
+automountServiceAccountToken: false
+{{- if .resourceQuota }}
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: build-quota
+  namespace: {{ $ns }}
+  labels:
+    app: {{ $.Release.Name }}
+spec:
+  hard:
+    {{- toYaml .resourceQuota | nindent 4 }}
+{{- end }}
+{{- if .limitRange }}
+---
+# Defaults for containers that don't set resources (required once a quota exists).
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: build-limits
+  namespace: {{ $ns }}
+  labels:
+    app: {{ $.Release.Name }}
+spec:
+  limits:
+    - type: Container
+      {{- toYaml .limitRange | nindent 6 }}
+{{- end }}
+{{- if .networkPolicy.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: build-isolation
+  namespace: {{ $ns }}
+  labels:
+    app: {{ $.Release.Name }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  # No ingress rules: nothing needs to connect in; agents dial out to the controller.
+  ingress: []
+  egress:
+    # Cluster DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # This release's controller only (HTTP/websocket + inbound agent port)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ $.Values.namespace }}
+          podSelector:
+            matchLabels:
+              app: {{ $.Release.Name }}
+      ports:
+        - protocol: TCP
+          port: {{ $.Values.service.targetPort }}
+        - protocol: TCP
+          port: {{ $.Values.service.agentTargetPort }}
+    # Public internet, excluding private/LAN/cluster ranges
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              {{- toYaml .networkPolicy.blockedCIDRs | nindent 14 }}
+    {{- with .networkPolicy.extraEgress }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -149,3 +149,8 @@ onepasswordSecrets:
 rbac:
   enabled: true
   agentNamespace: jenkins
+
+# Isolated build namespace (rbac.agentNamespace) for controllers that run untrusted
+# pipelines. Off for this instance; enabled in values-agentic.yaml.
+buildIsolation:
+  enabled: false

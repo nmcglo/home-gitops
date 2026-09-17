@@ -1,0 +1,184 @@
+# Overlay for the agent-dedicated Jenkins controller (ArgoCD app: jenkins-agentic).
+# Layered on top of values.yaml. Helm deep-merges maps but replaces lists and strings
+# wholesale, so jcasc.config and onepasswordSecrets below are complete replacements.
+#
+# Isolation from the main "jenkins" release:
+#   - separate controller namespace, PVC, ServiceAccount, and LoadBalancer IP
+#   - separate 1Password items; no credentials are shared with the main controller
+#   - builds run in their own namespace (jenkins-agentic-builds): PSA baseline,
+#     resource quota, no SA token, and egress limited to DNS, this controller, and
+#     the public internet
+#   - the agent's Jenkins user isn't an admin: it can't run script console / unsandboxed
+#     Groovy, change global config, or attach static agents outside Kubernetes
+#   - the built-in node has 0 executors, so no build ever runs inside the controller pod
+
+namespace: jenkins-agentic
+
+service:
+  type: LoadBalancer
+  port: 8080
+  targetPort: 8080
+  agentPort: 50000
+  agentTargetPort: 50000
+  loadBalancerIP: ""  # Set to a specific IP for MetalLB static assignment, e.g. "192.168.100.21"
+
+persistence:
+  enabled: true
+  storageClass: "longhorn"
+  accessMode: ReadWriteMany
+  size: 50Gi
+
+jcasc:
+  enabled: true
+  config: |
+    jenkins:
+      # Never run builds on the controller (it holds JENKINS_HOME and the env secrets).
+      numExecutors: 0
+      securityRealm:
+        local:
+          allowsSignup: false
+          users:
+            - id: "${JENKINS_ADMIN_ID}"
+              password: "${JENKINS_ADMIN_PASSWORD}"
+            - id: "${JENKINS_AGENT_ID}"
+              password: "${JENKINS_AGENT_PASSWORD}"
+      authorizationStrategy:
+        roleBased:
+          roles:
+            global:
+              - name: "admin"
+                description: "Full administrative access (human operator only)"
+                permissions:
+                  - "Overall/Administer"
+                entries:
+                  - user: "${JENKINS_ADMIN_ID}"
+              - name: "agent"
+                description: "Manage jobs, pipelines, builds, and job credentials; no system admin"
+                permissions:
+                  - "Overall/Read"
+                  - "Job/Build"
+                  - "Job/Cancel"
+                  - "Job/Configure"
+                  - "Job/Create"
+                  - "Job/Delete"
+                  - "Job/Discover"
+                  - "Job/Move"
+                  - "Job/Read"
+                  - "Job/Workspace"
+                  - "Run/Delete"
+                  - "Run/Replay"
+                  - "Run/Update"
+                  - "View/Configure"
+                  - "View/Create"
+                  - "View/Delete"
+                  - "View/Read"
+                  - "SCM/Tag"
+                  - "Credentials/Create"
+                  - "Credentials/Delete"
+                  - "Credentials/Update"
+                  - "Credentials/View"
+                entries:
+                  - user: "${JENKINS_AGENT_ID}"
+      clouds:
+        - kubernetes:
+            name: "kubernetes"
+            namespace: "jenkins-agentic-builds"
+            # In-cluster URLs: build pods only need to reach this controller, and the
+            # build NetworkPolicy blocks everything else on the LAN.
+            jenkinsUrl: "http://jenkins-agentic-service.jenkins-agentic.svc.cluster.local:8080"
+            jenkinsTunnel: "jenkins-agentic-service.jenkins-agentic.svc.cluster.local:50000"
+            containerCapStr: "5"
+            templates:
+              - name: "default"
+                label: "kubernetes"
+                nodeUsageMode: NORMAL
+                containers:
+                  - name: "jnlp"
+                    image: "jenkins/inbound-agent:latest"
+                    alwaysPullImage: false
+                    workingDir: "/home/jenkins/agent"
+                    ttyEnabled: false
+                    resourceRequestCpu: "100m"
+                    resourceRequestMemory: "256Mi"
+                    resourceLimitCpu: "500m"
+                    resourceLimitMemory: "512Mi"
+    appearance:
+      prism:
+        theme: PRISM
+      themeManager:
+        disableUserThemes: false
+        theme: "solarizedSystem"
+
+# Create both Login items (username/password fields) before syncing. Use a distinct
+# admin password from the main instance, so a compromise here doesn't carry over.
+onepasswordSecrets:
+  - name: jenkins-agentic-admin-creds
+    enabled: true
+    itemPath: "vaults/home-gitops/items/Jenkins Agentic Admin"
+    autoRestart: "true"
+    env:
+      - envVar: JENKINS_ADMIN_ID
+        secretKey: username
+      - envVar: JENKINS_ADMIN_PASSWORD
+        secretKey: password
+  - name: jenkins-agentic-agent-creds
+    enabled: true
+    itemPath: "vaults/home-gitops/items/Jenkins PiDev"
+    autoRestart: "true"
+    env:
+      - envVar: JENKINS_AGENT_ID
+        secretKey: username
+      - envVar: JENKINS_AGENT_PASSWORD
+        secretKey: password
+
+rbac:
+  enabled: true
+  agentNamespace: jenkins-agentic-builds
+
+buildIsolation:
+  enabled: true
+  # "restricted" would also block root containers, which breaks most stock build images.
+  # "baseline" still blocks privileged, hostPath, hostNetwork/PID, and added capabilities.
+  podSecurity:
+    enforce: baseline
+    warn: restricted
+  # Caps on the whole build namespace
+  resourceQuota:
+    pods: "10"
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 16Gi
+    persistentvolumeclaims: "0"
+    services.loadbalancers: "0"
+    services.nodeports: "0"
+  limitRange:
+    default:
+      cpu: "1"
+      memory: 1Gi
+    defaultRequest:
+      cpu: 100m
+      memory: 256Mi
+    max:
+      cpu: "4"
+      memory: 8Gi
+  networkPolicy:
+    enabled: true
+    # Blocked for build pods: LAN, pod/service CIDRs, and link-local (cloud metadata).
+    # The API server is reached via node IPs (192.168.x.x), so it's blocked too.
+    blockedCIDRs:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+      - 169.254.0.0/16
+      - 100.64.0.0/10
+    # Allow specific internal services here, e.g. a git server or registry:
+    # extraEgress:
+    #   - to:
+    #       - namespaceSelector:
+    #           matchLabels:
+    #             kubernetes.io/metadata.name: forgejo
+    #     ports:
+    #       - protocol: TCP
+    #         port: 3000
+    extraEgress: []
