@@ -4,7 +4,7 @@ revisionHistoryLimit: 2
 
 image:
   repository: jenkins/jenkins
-  tag: "2.541.2-lts-alpine"
+  tag: "2.582"
   pullPolicy: IfNotPresent
 
 service:
