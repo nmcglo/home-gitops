@@ -85,8 +85,8 @@ jcasc:
             namespace: "jenkins-agentic-builds"
             # In-cluster URLs: build pods only need to reach this controller, and the
             # build NetworkPolicy blocks everything else on the LAN.
-            jenkinsUrl: "http://jenkins-agentic-service.jenkins-agentic.svc.cluster.local:8080"
-            jenkinsTunnel: "jenkins-agentic-service.jenkins-agentic.svc.cluster.local:50000"
+            jenkinsUrl: "https://jenkins-agentic.example.net"
+            jenkinsTunnel: "https://jenkins-agentic-service.example.net"
             containerCapStr: "5"
             templates:
               - name: "default"
