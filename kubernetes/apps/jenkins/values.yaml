@@ -78,15 +78,15 @@ jcasc:
                 description: "Full administrative access"
                 permissions:
                   - "Overall/Administer"
-                assignments:
-                  - "${JENKINS_ADMIN_ID}"
+                entries:
+                  - user: "${JENKINS_ADMIN_ID}"
               - name: "developer"
                 description: "Baseline for logged-in users — global read only, no job access by default"
                 permissions:
                   - "Overall/Read"
                   - "View/Read"
-                assignments:
-                  - "authenticated"
+                entries:
+                  - group: "authenticated"
             # Per-project roles grant additional permissions on top of the global roles,
             # scoped to jobs/folders whose name matches `pattern`. This is what gives
             # granular (per-team/per-folder) access instead of all-or-nothing.
@@ -102,8 +102,8 @@ jcasc:
                   - "Job/Cancel"
                   - "Job/Read"
                   - "Job/Workspace"
-                assignments:
-                  - "authenticated"
+                entries:
+                  - group: "authenticated"
       clouds:
         - kubernetes:
             name: "kubernetes"
