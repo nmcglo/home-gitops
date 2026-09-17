@@ -13,7 +13,7 @@ onepasswordSecrets:
 
 overleaf:
   image:
-    repository: docker.io/library/nmcglo/sharelatex
+    repository: nmcglo/sharelatex
     tag: "main-e039ad26c5bf5422eb57b89fc7e57c75055e631d"
     pullPolicy: IfNotPresent
   # Overleaf CE serves its bundled nginx on port 80 inside the container
