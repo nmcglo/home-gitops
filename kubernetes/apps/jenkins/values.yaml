@@ -35,18 +35,9 @@ javaOpts: "-Djenkins.install.runSetupWizard=false"
 # 1Password operator managed secrets.
 # Each entry creates a OnePasswordItem which the operator syncs into a Kubernetes Secret
 # of the same name. Fields from that secret can then be mapped to environment variables.
-#
-# onepasswordSecrets:
-#   - name: jenkins-admin-creds       # Name of the OnePasswordItem (and resulting K8s Secret)
-#     enabled: true
-#     itemPath: "vaults/MyVault/items/JenkinsAdmin"
-#     autoRestart: "true"             # Restart pod when secret changes (default: true)
-#     env:
-#       - envVar: JENKINS_ADMIN_ID    # Environment variable name inside the container
-#         secretKey: username         # Field name within the 1Password item
-#       - envVar: JENKINS_ADMIN_PASSWORD
-#         secretKey: password
-#
+# jenkins-admin-creds below supplies the JCasC-configured admin login further down —
+# create a Login item at that path with "username"/"password" fields before deploying.
+
 # Plugins installed by the init container via jenkins-plugin-cli at startup.
 # Format: "plugin-id:version" — use "latest" to always pull the newest compatible version.
 plugins:
@@ -58,6 +49,7 @@ plugins:
   - "job-dsl:latest"
   - "dark-theme:latest"
   - "solarized-theme:latest"
+  - "role-strategy:latest"        # Role-based authorization (global + per-project roles)
 
 # Jenkins Configuration as Code (JCasC).
 # Mounted into the container and loaded via CASC_JENKINS_CONFIG.
@@ -67,6 +59,51 @@ jcasc:
   enabled: true
   config: |
     jenkins:
+      # Local user database. The admin account's credentials are injected as env vars
+      # (JENKINS_ADMIN_ID / JENKINS_ADMIN_PASSWORD) from the 1Password item below, and
+      # JCasC interpolates them with ${...} — the actual password never lands in this file.
+      securityRealm:
+        local:
+          allowsSignup: false
+          users:
+            - id: "${JENKINS_ADMIN_ID}"
+              password: "${JENKINS_ADMIN_PASSWORD}"
+      # Role Strategy plugin: one set of global roles (coarse capabilities) plus
+      # per-project/folder roles (fine-grained access scoped by job name pattern).
+      authorizationStrategy:
+        roleBased:
+          roles:
+            global:
+              - name: "admin"
+                description: "Full administrative access"
+                permissions:
+                  - "Overall/Administer"
+                assignments:
+                  - "${JENKINS_ADMIN_ID}"
+              - name: "developer"
+                description: "Baseline for logged-in users — global read only, no job access by default"
+                permissions:
+                  - "Overall/Read"
+                  - "View/Read"
+                assignments:
+                  - "authenticated"
+            # Per-project roles grant additional permissions on top of the global roles,
+            # scoped to jobs/folders whose name matches `pattern`. This is what gives
+            # granular (per-team/per-folder) access instead of all-or-nothing.
+            # Example: any authenticated user can build/cancel/read jobs under a
+            # "public-" prefix; everything else stays invisible to them since the
+            # "developer" global role above grants no Job/* permissions.
+            items:
+              - name: "public-jobs"
+                description: "Example project role — full build access to jobs prefixed public-"
+                pattern: "public-.*"
+                permissions:
+                  - "Job/Build"
+                  - "Job/Cancel"
+                  - "Job/Read"
+                  - "Job/Workspace"
+                assignments:
+                  - "authenticated"
       clouds:
         - kubernetes:
             name: "kubernetes"
@@ -95,7 +132,16 @@ jcasc:
         disableUserThemes: false
         theme: "solarizedSystem"
 
-onepasswordSecrets: []
+onepasswordSecrets:
+  - name: jenkins-admin-creds
+    enabled: true
+    itemPath: "vaults/home-gitops/items/Jenkins Admin"
+    autoRestart: "true"
+    env:
+      - envVar: JENKINS_ADMIN_ID
+        secretKey: username
+      - envVar: JENKINS_ADMIN_PASSWORD
+        secretKey: password
 
 # RBAC for the Kubernetes plugin (dynamic build agents).
 # Grants the Jenkins ServiceAccount permission to create/delete pods in agentNamespace.
