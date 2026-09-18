@@ -7,6 +7,12 @@ metadata:
     app: {{ .Release.Name }}
 spec:
   replicas: 1
+  # Recreate, not RollingUpdate: Jenkins is a singleton and JENKINS_HOME must never be
+  # mounted by two pods at once. On a rolling update the old pod still holds plugin jars
+  # open while the new one re-explodes them, which on the NFS-backed RWX volume leaves
+  # .nfsXXXX busy files and breaks plugin loading.
+  strategy:
+    type: Recreate
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
