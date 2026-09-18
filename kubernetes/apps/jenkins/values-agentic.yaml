@@ -195,7 +195,7 @@ buildIsolation:
             port: 22
       - to:
           - ipBlock:
-              cidr: 192.168.100.28/36
+              cidr: 192.168.100.28/32
         ports:
           - protocol: TCP
             port: 443
