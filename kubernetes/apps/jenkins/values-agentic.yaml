@@ -182,7 +182,7 @@ buildIsolation:
       - 192.168.0.0/16
       - 169.254.0.0/16
       - 100.64.0.0/10
-    Allow specific internal services here, e.g. a git server or registry:
+    #Allow specific internal services here, e.g. a git server or registry:
     extraEgress:
       - to:
           - namespaceSelector:
