@@ -182,13 +182,14 @@ buildIsolation:
       - 192.168.0.0/16
       - 169.254.0.0/16
       - 100.64.0.0/10
-    # Allow specific internal services here, e.g. a git server or registry:
-    # extraEgress:
-    #   - to:
-    #       - namespaceSelector:
-    #           matchLabels:
-    #             kubernetes.io/metadata.name: forgejo
-    #     ports:
-    #       - protocol: TCP
-    #         port: 3000
-    extraEgress: []
+    Allow specific internal services here, e.g. a git server or registry:
+    extraEgress:
+      - to:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: forgejo
+        ports:
+          - protocol: TCP
+            port: 443
+          - protocol: TCP
+            port: 22
