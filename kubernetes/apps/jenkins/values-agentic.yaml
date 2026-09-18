@@ -34,6 +34,9 @@ jcasc:
     jenkins:
       # Never run builds on the controller (it holds JENKINS_HOME and the env secrets).
       numExecutors: 0
+      # Fixed inbound agent port (matches service.agentPort); "0" would pick a random
+      # port each restart and "-1" disables the listener entirely.
+      slaveAgentPort: 50000
       securityRealm:
         local:
           allowsSignup: false
@@ -83,10 +86,12 @@ jcasc:
         - kubernetes:
             name: "kubernetes"
             namespace: "jenkins-agentic-builds"
-            # In-cluster URLs: build pods only need to reach this controller, and the
-            # build NetworkPolicy blocks everything else on the LAN.
-            jenkinsUrl: "https://jenkins-agentic.example.net"
-            jenkinsTunnel: "https://jenkins-agentic-service.example.net"
+            # Agents connect in-cluster: the build NetworkPolicy only allows egress to
+            # this controller's pod, so the external hostname can't be used here.
+            # jenkinsTunnel is a TCP endpoint (host:port), never a URL.
+            # The browser-facing URL is set under unclassified.location below.
+            jenkinsUrl: "http://jenkins-agentic-service.jenkins-agentic.svc.cluster.local:8080"
+            jenkinsTunnel: "jenkins-agentic-service.jenkins-agentic.svc.cluster.local:50000"
             containerCapStr: "5"
             templates:
               - name: "default"
@@ -102,6 +107,11 @@ jcasc:
                     resourceRequestMemory: "256Mi"
                     resourceLimitCpu: "500m"
                     resourceLimitMemory: "512Mi"
+    unclassified:
+      # Only affects links Jenkins renders in the UI, emails, and webhooks — agents
+      # use the in-cluster jenkinsUrl above.
+      location:
+        url: "https://jenkins-agentic.example.net/"
     appearance:
       prism:
         theme: PRISM
