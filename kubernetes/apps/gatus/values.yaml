@@ -82,6 +82,12 @@ onepasswordSecrets:
     env:
       - envVar: HOME_ASSISTANT_WEBHOOK_URL
         secretKey: URL
+  - name: jenkins-api-auth
+    enabled: true
+    itemPath: "vaults/home-gitops/items/Jenkins API Token"
+    env:
+      - envVar: JENKINS_API_TOKEN
+        secretKey: credential
 
 # Gatus configuration - see https://github.com/TwiN/gatus for full reference
 config: |
@@ -330,6 +336,8 @@ config: |
       method: GET
       client:
         timeout: 10s
+      headers:
+        Authorization: "Bearer $JENKINS_API_TOKEN"
       conditions:
         - "[STATUS] == 200"
       interval: 5m
