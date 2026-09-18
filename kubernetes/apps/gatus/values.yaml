@@ -86,8 +86,8 @@ onepasswordSecrets:
     enabled: true
     itemPath: "vaults/home-gitops/items/Jenkins API Token"
     env:
-      - envVar: JENKINS_API_TOKEN
-        secretKey: credential
+      - envVar: JENKINS_BASIC_AUTH_B64
+        secretKey: basic_credential_base64
 
 # Gatus configuration - see https://github.com/TwiN/gatus for full reference
 config: |
@@ -337,7 +337,7 @@ config: |
       client:
         timeout: 10s
       headers:
-        Authorization: "Bearer $JENKINS_API_TOKEN"
+        Authorization: "Basic $JENKINS_BASIC_AUTH_B64"
       conditions:
         - "[STATUS] == 200"
       interval: 5m
