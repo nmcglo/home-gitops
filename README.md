@@ -1,7 +1,7 @@
 # Home Infrastructure
 
 > [!NOTE]
-> This is a sanitized, public mirror of a private GitOps repository hosted on an on-prem Git remote. Secrets, internal hostnames/IPs, and environment-specific values have been scrubbed or replaced with placeholders. Some history/commits may be squashed or redacted.
+> This is a sanitized, public fork of a private GitOps repository hosted on an on-prem Git remote. Secrets, internal hostnames/IPs, and environment-specific values have been scrubbed or replaced with placeholders. Some history/commits may be squashed or redacted - I'm also unlikely to update it frequently.
 
 A GitOps-based home infrastructure management system using K3s, ArgoCD, and Docker Compose.
 
