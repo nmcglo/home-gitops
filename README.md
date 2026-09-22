@@ -1,33 +1,45 @@
 # Home Infrastructure
 
+> [!NOTE]
+> This is a sanitized, public mirror of a private GitOps repository hosted on an on-prem Git remote. Secrets, internal hostnames/IPs, and environment-specific values have been scrubbed or replaced with placeholders. Some history/commits may be squashed or redacted.
+
 A GitOps-based home infrastructure management system using K3s, ArgoCD, and Docker Compose.
 
 ## Overview
 
-This repository contains all configuration and deployment code for managing home infrastructure services. Services are deployed using:
+This repository contains configuration and deployment code for managing home infrastructure services. Services are deployed using:
 
 - **Kubernetes (K3s)**: Lightweight Kubernetes for containerized services
 - **MetalLB**: LoadBalancer implementation for bare-metal Kubernetes
 - **ArgoCD**: GitOps-based continuous deployment
+- **Longhorn**: Optional distributed block storage
+- **1Password Connect**: Secrets sourced from 1Password instead of committed to Git
 - **Docker Compose**: For simpler services that don't need Kubernetes
 
 ## Repository Structure
 
 ```
-home-infra/
+home-gitops/
 ├── docs/                    # Detailed documentation
 ├── infrastructure/          # Core infrastructure setup
-│   ├── k3s/                # K3s cluster installation
-│   ├── metallb/            # MetalLB LoadBalancer
-│   ├── argocd/             # ArgoCD installation
-│   └── storage/            # Storage configurations
-├── kubernetes/              # Kubernetes deployments
-│   ├── apps/               # Helm charts for all services
-│   ├── argocd-apps/        # ArgoCD Application definitions
-│   └── core/               # Core cluster resources
-├── docker/                  # Docker Compose services
-├── images/                  # Custom Docker images
-└── scripts/                 # Automation scripts
+│   ├── k3s/                 # K3s cluster installation
+│   ├── metallb/              # MetalLB LoadBalancer
+│   ├── argocd/               # ArgoCD installation
+│   ├── longhorn/             # Optional distributed storage
+│   ├── storage/              # NFS/storage class configs
+│   ├── 1password/            # 1Password Connect for secrets
+│   ├── traefik-extra/        # Extra Traefik IngressRoutes
+│   └── rockchip-npu-device-plugin/  # NPU device plugin (RK1/rockchip nodes)
+├── kubernetes/
+│   ├── apps/                 # Helm charts for all services
+│   ├── argocd-apps/          # ArgoCD Application definitions
+│   └── resources/            # Shared cluster resources (namespaces, etc.)
+├── docker/                   # Docker Compose services
+├── images/                   # Custom Docker images
+├── scripts/                  # Automation scripts
+├── skills/                   # Agent/automation skill definitions (e.g. scaffolding new apps)
+├── utility/                  # One-off tooling, migration helpers, test manifests
+└── to_port/                  # Manifests staged for migration into kubernetes/apps
 ```
 
 ## Quick Start
@@ -44,7 +56,7 @@ home-infra/
 1. Clone this repository:
    ```bash
    git clone <your-repo-url>
-   cd home-infra
+   cd home-gitops
    ```
 
 2. Run the setup script:
@@ -85,25 +97,42 @@ home-infra/
 
 ## Services
 
-### Kubernetes Services
+### Kubernetes Services (`kubernetes/apps/`)
 
-| Service | Description | Port | Namespace |
-|---------|-------------|------|-----------|
-| **AdGuard Home** | DNS ad-blocking | 53, 80, 3000 | adguard |
-| **Home Assistant** | Home automation | 80, 443 | home-assist |
-| **Minecraft** | Minecraft server | 25565 | minecraft |
-| **Error Pages** | Custom Traefik error pages | 8080 | default |
-| **Monitoring** | Prometheus + Grafana | 9090, 3000 | monitoring |
-| **Emby Exporter** | Emby metrics for Prometheus | 8080 | prometheus-exporters |
-| **qBittorrent Exporter** | qBittorrent metrics | 8080 | prometheus-exporters |
-| **Nginx Proxy Manager** | Reverse proxy with UI | 80, 443, 81 | nginx-proxy-manager |
-| **Nginx Test** | Static test page | 80 | nginx-test |
+Each service is a Helm chart deployed via an ArgoCD Application (`kubernetes/argocd-apps/`).
 
-### Docker Compose Services
+| Category | Services |
+|----------|----------|
+| **Networking / Ingress** | adguard-home, adguard-home-sync, nginx-proxy-manager, nginx-test, cloudflared-tunnel, error-pages |
+| **Media** | audiobookshelf, tronbyt-server, emby-exporter, qbittorrent-exporter |
+| **Home / Personal** | home-assistant, homepage, homelable, actual-budget, mealie |
+| **AI / LLM** | openwebui, anythingllm, litellm, firecrawl, camofox, searxng, rk-llama.cpp-server, rockllama |
+| **Dev Tooling** | onedev, jenkins, docker-registry |
+| **Documents / Productivity** | paperless-ngx, stirling-pdf, overleaf |
+| **Monitoring / Observability** | app-monitoring (Prometheus + Grafana), gatus |
+| **Games** | minecraft |
 
-| Service | Description | Port |
-|---------|-------------|------|
-| **Emby** | Media server | 8096, 8920 |
+### Docker Compose Services (`docker/`)
+
+| Service | Description |
+|---------|-------------|
+| **emby** | Media server |
+| **paperless-ngx** | Document management (compose-only variant) |
+| **mealie** | Recipe manager (compose-only variant) |
+| **scanner-pi** | Document scanning helper running on a Raspberry Pi |
+
+## Infrastructure Components
+
+| Component | Path | Purpose |
+|-----------|------|---------|
+| K3s | `infrastructure/k3s/` | Lightweight Kubernetes distribution |
+| MetalLB | `infrastructure/metallb/` | Bare-metal LoadBalancer |
+| ArgoCD | `infrastructure/argocd/` | GitOps continuous deployment |
+| Longhorn | `infrastructure/longhorn/` | Optional distributed block storage |
+| Storage | `infrastructure/storage/` | NFS and StorageClass configuration |
+| 1Password Connect | `infrastructure/1password/` | Secrets management integration |
+| Traefik Extra | `infrastructure/traefik-extra/` | Additional IngressRoutes for the built-in Traefik |
+| Rockchip NPU Device Plugin | `infrastructure/rockchip-npu-device-plugin/` | Exposes RK1/rockchip NPU hardware to Kubernetes |
 
 ## Configuration
 
@@ -123,9 +152,11 @@ home-infra/
    kubectl apply -f kubernetes/argocd-apps/<service>.yaml
    ```
 
+See `skills/new-k8s-app/SKILL.md` for a guided scaffold of the chart + Application boilerplate.
+
 ## Secrets Management
 
-See individual service documentation for specific secret requirements.
+Secrets are sourced from 1Password via the Connect server in `infrastructure/1password/` rather than committed to Git. See individual service documentation for specific secret requirements.
 
 ## Storage
 
@@ -194,7 +225,7 @@ kubectl logs -n <namespace> -l app=<service> -f
 
 Docker services:
 ```bash
-docker-compose -f docker/<service>/docker-compose.yaml logs -f
+docker compose -f docker/<service>/docker-compose.yaml logs -f
 ```
 
 ### Cluster Status
@@ -205,15 +236,18 @@ kubectl get pods --all-namespaces
 kubectl get applications -n argocd
 ```
 
-## Troubleshooting
+## Utility & Staging Areas
 
-See [docs/troubleshooting.md](docs/troubleshooting.md) for common issues and solutions.
+- `utility/` — one-off migration helpers, test manifests, and scratch tooling not part of the steady-state GitOps flow (e.g. `pvc-copy/`, `rk1dev/`, `1password-test/`).
+- `to_port/` — manifests for services awaiting conversion into proper Helm charts under `kubernetes/apps/`.
 
 ## Documentation
 
 - [Setup Guide](docs/setup.md) - Detailed setup instructions
 - [Services](docs/services.md) - Service-specific documentation
 - [Architecture](docs/architecture.md) - System architecture overview
+- [Migration Guide](docs/migration-guide.md) - Notes on the move to the GitOps layout
+- [Changelog](CHANGELOG.md) - Notable changes to this repository
 
 ## Custom Images
 
